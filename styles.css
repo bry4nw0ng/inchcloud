@@ -1,0 +1,419 @@
+/* ============================================================
+   bryan wong — digital wallet
+   ============================================================ */
+
+/* ---- base ---- */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, .16); border-radius: 8px; }
+
+body {
+  min-height: 100vh;
+  background: oklch(0.97 0.006 95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 24px 140px;
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+a { color: inherit; }
+
+/* shared mono eyebrow tone */
+.mono { font-family: 'Space Mono', monospace; }
+
+/* ---- header ---- */
+.wallet-header { width: 480px; margin-bottom: 30px; }
+.wallet-header__kicker {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: #1c1c1a;
+}
+.wallet-header__sub { font-size: 13px; color: #9a9a90; margin-top: 4px; }
+
+/* ---- footer ---- */
+.wallet-footer {
+  width: 480px;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.wallet-footer__issued {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: #a3a399;
+}
+.wallet-footer__links { display: flex; gap: 10px; }
+
+.pill {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #1d1c19;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, .13);
+  border-radius: 999px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.pill:hover { background: #1d1c19; color: #ffffff; border-color: #1d1c19; }
+
+/* ---- wallet stage ---- */
+.wallet {
+  position: relative;
+  width: 480px;
+  margin: 0 auto;
+  transition: height .55s ease;
+}
+
+.back-btn {
+  position: absolute;
+  top: 14px;
+  left: -56px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, .12);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  z-index: 300;
+}
+.wallet.is-active .back-btn { opacity: 1; pointer-events: auto; }
+
+/* card wrapper — top / z-index / transform / opacity are set inline by JS */
+.card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  cursor: pointer;
+  transition: transform .6s cubic-bezier(.22, 1, .36, 1),
+              opacity .4s ease,
+              top .6s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ============================================================
+   card faces
+   ============================================================ */
+
+/* full-bleed image cards (projects / club / boarding) */
+.card-img { display: block; width: 100%; height: 300px; }
+.card-img--projects { object-fit: cover; border-radius: 8px; }
+.card-img--club { object-fit: contain; }
+.card-img--boarding { object-fit: cover; border-radius: 16px; }
+
+/* shared id photo (nyc + student) */
+.id-photo {
+  position: absolute;
+  left: 22px;
+  bottom: 17px;
+  width: 155px;
+  height: 216px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.id-photo--nyc {
+  object-position: center 20%;
+  border: 2px solid #493724;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+}
+.id-photo--grad {
+  object-position: center 18%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .28);
+}
+
+/* 0 — nyc id */
+.card-nyc {
+  position: relative;
+  height: 300px;
+  border-radius: 16px;
+  padding: 20px 22px;
+  background: #d8cdba url(assets/nyc-skyline.png) left bottom / cover no-repeat;
+  color: #2b2419;
+  overflow: hidden;
+}
+.card-nyc__name {
+  font-family: 'Space Mono', monospace;
+  font-size: 21px;
+  letter-spacing: .5px;
+  font-weight: 700;
+  line-height: 1;
+  color: #493724;
+}
+.card-nyc__badge {
+  position: absolute;
+  right: 13px;
+  bottom: 17px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #f4efe4;
+  background: rgba(40, 30, 20, .55);
+  padding: 4px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+}
+
+/* 1 — student */
+.card-student {
+  position: relative;
+  height: 300px;
+  border-radius: 16px;
+  padding: 20px 22px;
+  background: #990000 url(assets/sbu-card.png) center / cover no-repeat;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.card-student__title {
+  font-family: 'Space Mono', monospace;
+  font-size: 19px;
+  letter-spacing: 1.5px;
+  opacity: .9;
+}
+.card-student__meta { position: absolute; left: 192px; right: 22px; bottom: 80px; }
+.card-student__year { font-size: 24px; font-weight: 600; line-height: 1.05; }
+.card-student__degree { font-size: 13px; opacity: .92; margin-top: 5px; line-height: 1.35; }
+
+/* 2 — work */
+.card-work {
+  position: relative;
+  height: 300px;
+  border-radius: 16px;
+  padding: 22px 24px;
+  color: #1c2e37;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background-color: #7fa6b8;
+}
+.card-work__orb {
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .10);
+}
+.card-work__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg,
+    rgba(255, 255, 255, .30) 0%,
+    rgba(255, 255, 255, .10) 20%,
+    rgba(255, 255, 255, 0) 44%,
+    rgba(255, 255, 255, 0) 100%);
+}
+.card-work__title {
+  font-family: 'Space Mono', monospace;
+  font-size: 19px;
+  letter-spacing: 2.5px;
+  font-weight: 700;
+}
+.card-work__chips { display: flex; justify-content: flex-start; align-items: center; gap: 14px; }
+.card-work__foot { display: flex; justify-content: flex-end; align-items: flex-end; }
+.card-work__holder-wrap { text-align: right; }
+.card-work__holder-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  opacity: .6;
+}
+.card-work__holder-name { font-size: 17px; font-weight: 600; letter-spacing: .3px; margin-top: 3px; }
+
+/* ============================================================
+   detail panels
+   ============================================================ */
+.detail {
+  position: absolute;
+  top: 318px;
+  left: 0;
+  right: 0;
+  display: none;            /* JS toggles to block */
+  font-family: 'Hanken Grotesk', sans-serif;
+  color: #1d1c19;
+  border-radius: 18px;
+  overflow-y: auto;
+}
+.detail.is-open { display: block; }
+
+.detail--card { background: #fff; border: 1px solid rgba(0, 0, 0, .09); }
+
+/* per-panel padding / height */
+.detail--nyc      { padding: 24px;      max-height: 438px; }
+.detail--student  { padding: 24px;      max-height: 438px; }
+.detail--work     { padding: 18px 20px 8px; max-height: 452px; }
+.detail--club     { padding: 24px;      max-height: 452px; }
+.detail--personal { padding: 28px 24px; max-height: 438px; }
+
+/* small mono section label */
+.kicker {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #a3a399;
+}
+.kicker--gap { margin-top: 24px; }
+
+/* nyc panel */
+.lead { font-size: 15.5px; line-height: 1.55; margin: 10px 0 0; text-wrap: pretty; }
+.link-col { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: #1d1c19;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.link-row__arrow { opacity: .45; }
+
+/* student panel */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.chip { font-size: 13px; border: 1px solid rgba(0, 0, 0, .12); border-radius: 999px; padding: 7px 13px; }
+.skills-list { font-family: 'Space Mono', monospace; font-size: 13.5px; line-height: 1.7; margin: 11px 0 0; }
+.note { font-size: 13.5px; line-height: 1.5; color: #76766d; margin: 14px 0 0; }
+
+/* work panel — activity list */
+.detail__title {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  font-weight: 700;
+  color: #1d1c19;
+  text-transform: uppercase;
+}
+.detail__title-wrap { padding: 0 4px 4px; }
+.activity-group {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #a3a399;
+  padding: 12px 4px 2px;
+}
+.activity-group--later { padding-top: 20px; }
+
+.activity { border-top: 1px solid rgba(0, 0, 0, .07); }
+.activity__head { display: flex; align-items: stretch; gap: 14px; padding: 14px 4px; cursor: pointer; }
+.activity__logo {
+  width: 48px;
+  height: 48px;
+  align-self: center;
+  border-radius: 12px;
+  overflow: hidden;
+  flex: none;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .07);
+}
+.activity__logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.activity__main { flex: 1; min-width: 0; }
+.activity__company { font-size: 16px; font-weight: 600; color: #1d1c19; line-height: 1.2; }
+.activity__role { font-size: 12.5px; color: #76766d; margin-top: 2px; text-wrap: pretty; }
+.activity__dates {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: .5px;
+  color: #9a9a90;
+  margin-top: 5px;
+}
+.activity__chevron {
+  align-self: center;
+  flex: none;
+  transform: rotate(0deg);
+  transition: transform .3s ease;
+}
+.activity.is-open .activity__chevron { transform: rotate(180deg); }
+
+.activity__body {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .38s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
+}
+.activity.is-open .activity__body { max-height: 260px; opacity: 1; }
+.activity__inner { padding: 0 4px 18px 64px; }
+.activity__desc { font-size: 13.5px; line-height: 1.55; color: #3d3d37; margin: 0; text-wrap: pretty; }
+.activity__tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .5px;
+  padding: 5px 11px;
+  border: 1px solid rgba(0, 0, 0, .13);
+  border-radius: 999px;
+  color: #566872;
+}
+
+/* projects panel — loose-leaf */
+.detail--paper {
+  background: #f1ede0;
+  border: 1px solid rgba(0, 0, 0, .07);
+  color: #2b2a24;
+  padding: 22px 22px 22px 46px;
+  max-height: 452px;
+  background-image: repeating-linear-gradient(transparent 0 27px, rgba(40, 60, 120, .1) 27px 28px);
+  background-position: 0 4px;
+}
+.looseleaf__margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38px;
+  width: 1.5px;
+  background: rgba(190, 70, 70, .4);
+}
+.proj + .proj { margin-top: 0; }
+.proj--first { margin-bottom: 24px; }
+.proj__head { display: flex; justify-content: space-between; align-items: baseline; }
+.proj__name { font-size: 20px; font-weight: 600; }
+.proj__date { font-family: 'Space Mono', monospace; font-size: 11px; color: #8a8576; }
+.proj__stack { font-family: 'Space Mono', monospace; font-size: 11.5px; color: #6c6859; margin-top: 3px; }
+.proj__desc { font-size: 14px; line-height: 1.65; margin: 11px 0 0; text-wrap: pretty; }
+
+/* club panel */
+.club__lead { font-size: 15px; line-height: 1.6; margin: 11px 0 0; text-wrap: pretty; }
+.club__lead strong { font-weight: 600; }
+.design-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; margin-top: 12px; }
+.club__note { font-size: 12.5px; color: #9a9a90; margin: 11px 0 0; }
+
+/* personal panel */
+.personal__lead { font-size: 18px; line-height: 1.5; font-weight: 500; margin: 14px 0 0; text-wrap: pretty; }
+
+/* image placeholders (drop real work here) */
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1.5px dashed rgba(0, 0, 0, .18);
+  border-radius: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .5px;
+  color: #a8a499;
+  background: rgba(0, 0, 0, .015);
+  padding: 6px;
+}
+.slot--wide { width: 100%; height: 150px; margin-top: 13px; }
+.slot--tile { height: 120px; }
