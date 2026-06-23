@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>bryan wong — digital wallet</title>
+<title>bryan's digital wallet</title>
 <meta name="description" content="bryan wong · cs grad, leaning product. a digital wallet portfolio.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -30,6 +30,135 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>mail</a>
     </div>
   </footer>
+
+  <!-- ============================================================
+       pass content — edit the text/markup here, not in wallet.js
+       face-N = the card face · detail-N = the panel it opens to
+       (N: 0 nyc · 1 student · 2 work · 3 projects · 4 club · 5 personal)
+       ============================================================ -->
+
+  <!-- 0 — NYC ID -->
+  <template id="face-0">
+    <div class="card-nyc">
+      <div class="card-nyc__name">bryan wong</div>
+      <img class="id-photo id-photo--nyc" src="assets/bryan-id.jpg" alt="bryan wong" draggable="false">
+      <div class="card-nyc__badge">est. 2004</div>
+    </div>
+  </template>
+  <template id="detail-0">
+    <div class="detail detail--card detail--nyc">
+      <div class="kicker">who</div>
+      <p class="lead">cs grad who keeps drifting to the product side — talking to users, sketching flows, deciding what's worth shipping. comfortable in the code, happiest figuring out what to build and why.</p>
+      <div class="link-col">
+        <a class="link-row" href="https://linkedin.com/in/bry4nw0ng" target="_blank" rel="noopener">linkedin.com/in/bry4nw0ng <span class="link-row__arrow">↗</span></a>
+        <a class="link-row" href="https://github.com/bry4nw0ng" target="_blank" rel="noopener">github.com/bry4nw0ng <span class="link-row__arrow">↗</span></a>
+      </div>
+    </div>
+  </template>
+
+  <!-- 1 — STUDENT -->
+  <template id="face-1">
+    <div class="card-student">
+      <div class="card-student__title">stony brook university</div>
+      <img class="id-photo id-photo--grad" src="assets/bryan-grad.jpg" alt="bryan wong graduation" draggable="false">
+      <div class="card-student__meta">
+        <div class="card-student__year">class of 2026</div>
+        <div class="card-student__degree">b.s. computer science · minor digital arts</div>
+      </div>
+    </div>
+  </template>
+  <template id="detail-1">
+    <div class="detail detail--card detail--student">
+      <div class="kicker">standout courses</div>
+      <div class="chips">
+        <span class="chip">2d game programming</span>
+        <span class="chip">nlp</span>
+        <span class="chip">machine learning</span>
+        <span class="chip">data science</span>
+      </div>
+      <div class="kicker kicker--gap">skills</div>
+      <p class="skills-list">react · python · figma · postgres · pytorch · adobe cc</p>
+      <p class="note">b.s. computer science with a minor in digital arts — the design half is on purpose.</p>
+    </div>
+  </template>
+
+  <!-- 2 — WORK (activity rows are rendered from the work/extra data in wallet.js
+       into the [data-group] anchors below) -->
+  <template id="face-2">
+    <div class="card-work">
+      <div class="card-work__orb"></div>
+      <div class="card-work__sheen"></div>
+      <div><div class="card-work__title">professional experience</div></div>
+      <div class="card-work__chips">
+        <svg width="46" height="35" viewBox="0 0 44 34" fill="none" stroke="rgba(28,46,55,.55)" stroke-width="1.3"><rect x="1" y="1" width="42" height="32" rx="5"></rect><path d="M1 12h13M30 12h13M1 22h13M30 22h13"></path><rect x="14" y="8" width="16" height="18" rx="3"></rect></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1c2e37" stroke-width="1.5" stroke-linecap="round" style="opacity:.55;"><path d="M5 10.5a3 3 0 0 1 0 3"></path><path d="M8.5 8a6 6 0 0 1 0 8"></path><path d="M12 5.5a9.5 9.5 0 0 1 0 13"></path></svg>
+      </div>
+      <div class="card-work__foot">
+        <div class="card-work__holder-wrap">
+          <div class="card-work__holder-label">cardholder</div>
+          <div class="card-work__holder-name">b. w.</div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <template id="detail-2">
+    <div class="detail detail--card detail--work">
+      <div class="detail__title-wrap"><div class="detail__title">recent activity</div></div>
+      <div class="activity-group" data-group="work">work</div>
+      <div class="activity-group activity-group--later" data-group="extra">extracurriculars</div>
+    </div>
+  </template>
+
+  <!-- 3 — PROJECTS -->
+  <template id="face-3">
+    <img class="card-img card-img--projects" src="assets/projects-card.png" alt="projects" draggable="false">
+  </template>
+  <template id="detail-3">
+    <div class="detail detail--paper">
+      <div class="looseleaf__margin"></div>
+      <div class="proj proj--first">
+        <div class="proj__head"><span class="proj__name">p4sbu</span><span class="proj__date">apr 2025</span></div>
+        <div class="proj__stack">react · node · express · postgres · mapbox · heroku</div>
+        <p class="proj__desc">a full-stack campus parking system. real-time lot availability, reservations, and secure payments; mapbox routes you to the nearest open spot, and an admin dashboard handles live changes + analytics.</p>
+        <div class="slot slot--wide">drop a p4sbu screenshot</div>
+      </div>
+      <div class="proj">
+        <div class="proj__head"><span class="proj__name">phreddit</span><span class="proj__date">dec 2024</span></div>
+        <div class="proj__stack">mongodb · express · react · node</div>
+        <p class="proj__desc">a full-stack reddit clone — posts, comments, voting, communities. mern stack, restful apis, jwt auth + session cookies.</p>
+        <div class="slot slot--wide">drop a phreddit screenshot</div>
+      </div>
+    </div>
+  </template>
+
+  <!-- 4 — CLUB -->
+  <template id="face-4">
+    <img class="card-img card-img--club" src="assets/casb-photo.png" alt="casb night market" draggable="false">
+  </template>
+  <template id="detail-4">
+    <div class="detail detail--card detail--club">
+      <div class="kicker">leadership</div>
+      <p class="club__lead">webmaster now, ex-fundraising chair (raised <strong>$1,000+</strong>), and before all that the graphic designer. so: ran the site, ran the money, and made the posters.</p>
+      <div class="kicker kicker--gap">design work</div>
+      <div class="design-grid">
+        <div class="slot slot--tile">poster</div>
+        <div class="slot slot--tile">flyer</div>
+        <div class="slot slot--tile">graphic</div>
+      </div>
+      <p class="club__note">craft, shown — drop the real work in here.</p>
+    </div>
+  </template>
+
+  <!-- 5 — PERSONAL -->
+  <template id="face-5">
+    <img class="card-img card-img--boarding" src="assets/boarding-pass.png" alt="boarding pass" draggable="false">
+  </template>
+  <template id="detail-5">
+    <div class="detail detail--card detail--personal">
+      <div class="kicker">off the clock</div>
+      <p class="personal__lead">weekends are for trails and the occasional very wrong turn.</p>
+    </div>
+  </template>
 
   <script src="wallet.js"></script>
 </body>
