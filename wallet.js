@@ -252,5 +252,22 @@
     });
   }
 
-  apply();
+  // ---- initial load-in: every card slides up from the bottom ----
+  // seed each card below its resting spot, then let apply() animate it home
+  for (var j = 0; j < N; j++) {
+    cardEls[j].style.transform = 'translateY(135%)';
+    cardEls[j].style.opacity = '0';
+    // stagger by stack position so the cards fan in instead of moving as one
+    cardEls[j].style.transitionDelay = ((N - 1 - j) * 0.06) + 's';
+  }
+  // commit the seeded state before the transition runs
+  void wallet.offsetHeight;
+
+  requestAnimationFrame(function () {
+    apply();
+    // clear the stagger so it doesn't bleed into focus/back animations
+    window.setTimeout(function () {
+      for (var k = 0; k < N; k++) cardEls[k].style.transitionDelay = '';
+    }, 900);
+  });
 })();
