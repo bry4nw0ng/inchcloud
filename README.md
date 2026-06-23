@@ -7,10 +7,10 @@ inchcloud.com
 
 - [ ] about me
 - [ ] education
-- [x] work experience
+- [ ] work experience
 - [ ] projects
 - [ ] casb
 - [ ] more about me
 
 
-- [ ] Deploy to inchcloud.com
+- [x] Deploy to inchcloud.com
