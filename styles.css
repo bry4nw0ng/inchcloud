@@ -249,26 +249,25 @@ a { color: inherit; }
    detail panels
    ============================================================ */
 .detail {
-  position: absolute;
-  top: 318px;
-  left: 0;
-  right: 0;
+  /* sits in normal flow, pushed below the focused card (300px tall) so the
+     panel's height is driven by its content — no fixed box, no inner scroll */
+  position: relative;
+  margin-top: 318px;
   display: none;            /* JS toggles to block */
   font-family: 'Hanken Grotesk', sans-serif;
   color: #1d1c19;
   border-radius: 18px;
-  overflow-y: auto;
 }
 .detail.is-open { display: block; }
 
 .detail--card { background: #fff; border: 1px solid rgba(0, 0, 0, .09); }
 
-/* per-panel padding / height */
-.detail--nyc      { padding: 24px;      max-height: 438px; }
-.detail--student  { padding: 24px;      height: 452px; background: #efece7; overflow: hidden; }
-.detail--work     { padding: 18px 20px 8px; max-height: 452px; }
-.detail--club     { padding: 24px;      max-height: 452px; }
-.detail--personal { padding: 28px 24px; max-height: 438px; }
+/* per-panel padding (heights come from content) */
+.detail--nyc      { padding: 24px; }
+.detail--student  { padding: 24px;      background: #efece7; }
+.detail--work     { padding: 18px 20px 8px; }
+.detail--club     { padding: 24px; }
+.detail--personal { padding: 28px 24px; }
 
 /* small mono section label */
 .kicker {
@@ -299,7 +298,7 @@ a { color: inherit; }
 [data-copy] { cursor: pointer; }
 
 /* student panel — coursework card */
-.coursework { display: flex; flex-direction: column; height: 100%; }
+.coursework { display: flex; flex-direction: column; }
 .cw-label {
   font-family: 'Space Mono', monospace;
   font-size: 15px;
@@ -357,7 +356,7 @@ a { color: inherit; }
 .legend__sw--eng { background: #8a1e1e; }
 .legend__sw--des { background: #c79a2a; }
 
-.course-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 14px; padding-bottom: 2px; }
+.course-list { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; padding-bottom: 2px; }
 .course {
   position: relative;
   display: flex;
@@ -477,7 +476,6 @@ a { color: inherit; }
   border: 1px solid rgba(0, 0, 0, .07);
   color: #2b2a24;
   padding: 22px 22px 22px 46px;
-  max-height: 452px;
   background-image: repeating-linear-gradient(transparent 0 27px, rgba(40, 60, 120, .1) 27px 28px);
   background-position: 0 4px;
 }

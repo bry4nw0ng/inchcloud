@@ -280,7 +280,9 @@
   function apply() {
     var active = state.focused !== null;
     wallet.classList.toggle('is-active', active);
-    wallet.style.height = active ? '830px' : (5 * PEEK + 314) + 'px';
+    // active: let the open panel (now in normal flow) drive the wallet's height
+    // so the whole page scrolls — no fixed box, no inner scrollbar
+    wallet.style.height = active ? 'auto' : (5 * PEEK + 314) + 'px';
 
     for (var i = 0; i < N; i++) {
       positionCard(cardEls[i], i);
