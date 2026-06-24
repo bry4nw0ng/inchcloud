@@ -5,7 +5,7 @@ inchcloud.com
 
 ## Roadmap
 
-- [ ] about me
+- [x] about me
 - [ ] education
 - [ ] work experience
 - [ ] projects

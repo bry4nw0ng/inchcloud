@@ -9,6 +9,22 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // ---- shuffle line (about panel) — click the underlined text to randomize ----
+  var actions = [
+    'overpacking for a three-day trip',
+    'ruining another steak in pursuit of the perfect one',
+    'praying that the flush comes out on the river',
+    'conquering the planet',
+    'thinking about getting a second bowl of chipotle',
+    'trying out random tft comps',
+    'learning bowser/terry combos',
+    'getting lost in a fan-made pokemon rom hack',
+    'exploring a minecraft modpack',
+    'launching threes with more confidence than accuracy',
+    'training to hit 185 bench before the end of the year',
+    'looking for a festival set to leave in the background',
+  ];
+
   // ---- activity data (work detail) ----
   var work = [
     { logo: 'assets/assurant.jpeg', company: 'assurant', role: 'global tax tech & operations intern', dates: '07/25 — 05/26',
@@ -98,6 +114,60 @@
     work.map(function (it, i) { return activityRow(it, 'w' + i); }).join(''));
   panelEls[2].querySelector('[data-group="extra"]').insertAdjacentHTML('afterend',
     extra.map(function (it, i) { return activityRow(it, 'e' + i); }).join(''));
+
+  // about panel: clicking the underlined text swaps in a random action
+  // (never the same one twice in a row)
+  (function () {
+    var el = panelEls[0].querySelector('[data-shuffle]');
+    if (!el) return;
+    var cur = Math.floor(Math.random() * actions.length);
+    el.textContent = actions[cur];
+    el.addEventListener('click', function () {
+      var next = cur;
+      while (actions.length > 1 && next === cur) {
+        next = Math.floor(Math.random() * actions.length);
+      }
+      cur = next;
+      el.textContent = actions[cur];
+    });
+  })();
+
+  // [data-copy] elements (footer mail pill + about-me email): copy to clipboard
+  // and flash "copied!" instead of navigating
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (el) {
+    var label = el.querySelector('[data-copy-label]') || el;
+    var original = label.textContent;
+    var revert;
+
+    function flash() {
+      label.textContent = 'copied!';
+      clearTimeout(revert);
+      revert = setTimeout(function () { label.textContent = original; }, 1500);
+    }
+    function copy() {
+      var text = el.getAttribute('data-copy');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(flash, function () { fallbackCopy(text); flash(); });
+      } else {
+        fallbackCopy(text);
+        flash();
+      }
+    }
+    el.addEventListener('click', function (e) { e.preventDefault(); copy(); });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copy(); }
+    });
+  });
 
   // wire activity toggles inside work panel
   panelEls[2].querySelectorAll('[data-acttoggle]').forEach(function (el) {

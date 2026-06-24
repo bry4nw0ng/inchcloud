@@ -48,6 +48,13 @@ a { color: inherit; }
   color: #a3a399;
 }
 .wallet-footer__links { display: flex; gap: 10px; }
+.wallet-footer__logo {
+  width: 50px;
+  height: 50px;
+  margin-top: 4px;
+  opacity: .55;
+  user-select: none;
+}
 
 .pill {
   font-family: 'Space Mono', monospace;
@@ -274,6 +281,7 @@ a { color: inherit; }
 
 /* nyc panel */
 .lead { font-size: 15.5px; line-height: 1.55; margin: 10px 0 0; text-wrap: pretty; }
+.shuffle { text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .link-col { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
 .link-row {
   display: flex;
@@ -288,6 +296,7 @@ a { color: inherit; }
   padding: 12px 14px;
 }
 .link-row__arrow { opacity: .45; }
+[data-copy] { cursor: pointer; }
 
 /* student panel */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
