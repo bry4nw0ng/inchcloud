@@ -117,9 +117,18 @@
 
   // about panel: clicking the underlined text swaps in a random action
   // (never the same one twice in a row)
+  //
+  // actions vary in length, so the longest ones wrap to an extra line. left
+  // alone, that makes the paragraph (and everything below it) grow and shrink
+  // as the text changes. lockShuffleHeight() measures the tallest variant and
+  // pins the paragraph's min-height to it, so the block always reserves the
+  // taller height — short actions just leave the extra line blank instead of
+  // shifting the rest of the panel.
+  var lockShuffleHeight = function () {};
   (function () {
     var el = panelEls[0].querySelector('[data-shuffle]');
     if (!el) return;
+    var para = el.closest('.lead');
     var cur = Math.floor(Math.random() * actions.length);
     el.textContent = actions[cur];
     el.addEventListener('click', function () {
@@ -130,6 +139,21 @@
       cur = next;
       el.textContent = actions[cur];
     });
+
+    lockShuffleHeight = function () {
+      // offsetParent is null while the panel is display:none — can't measure yet
+      if (!para || para.offsetParent === null) return;
+      para.style.minHeight = '';
+      var max = 0;
+      for (var i = 0; i < actions.length; i++) {
+        el.textContent = actions[i];
+        if (para.offsetHeight > max) max = para.offsetHeight;
+      }
+      el.textContent = actions[cur];
+      para.style.minHeight = max + 'px';
+    };
+    // width changes the wrap point, so remeasure when the window resizes
+    window.addEventListener('resize', lockShuffleHeight);
   })();
 
   // [data-copy] elements (footer mail pill + about-me email): copy to clipboard
@@ -214,6 +238,10 @@
       positionCard(cardEls[i], i);
       panelEls[i].classList.toggle('is-open', state.focused === i);
     }
+
+    // the about panel just became visible — now that it has layout, reserve
+    // space for the tallest shuffle action so swapping text doesn't shift things
+    if (state.focused === 0) lockShuffleHeight();
 
     panelEls[2].querySelectorAll('[data-actrow]').forEach(function (row) {
       row.classList.toggle('is-open', state.act === row.getAttribute('data-actrow'));
