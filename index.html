@@ -76,16 +76,27 @@
   </template>
   <template id="detail-1">
     <div class="detail detail--card detail--student">
-      <div class="kicker">standout courses</div>
-      <div class="chips">
-        <span class="chip">2d game programming</span>
-        <span class="chip">nlp</span>
-        <span class="chip">machine learning</span>
-        <span class="chip">data science</span>
+      <!-- coursework rows + count are rendered from the `courses`/`skills`
+           data in wallet.js into the [data-courses]/[data-course-count] anchors -->
+      <div class="coursework">
+        <div class="coursework__head">
+          <div class="cw-label">skills</div>
+          <div class="coursework__legend">
+            <span class="legend"><span class="legend__sw legend__sw--eng"></span>engineering</span>
+            <span class="legend"><span class="legend__sw legend__sw--des"></span>design</span>
+          </div>
+        </div>
+        <div class="marquee">
+          <div class="marquee__track">
+            <div class="marquee__group" data-skills></div>
+            <div class="marquee__group" data-skills aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="marquee__caption">hover to pause · loops on its own</div>
+
+        <div class="cw-label cw-label--gap">coursework</div>
+        <div class="course-list" data-courses></div>
       </div>
-      <div class="kicker kicker--gap">skills</div>
-      <p class="skills-list">react · python · figma · postgres · pytorch · adobe cc</p>
-      <p class="note">b.s. computer science with a minor in digital arts — the design half is on purpose.</p>
     </div>
   </template>
 

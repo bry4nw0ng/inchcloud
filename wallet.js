@@ -49,6 +49,48 @@
       tags: ['leadership', 'design', 'fundraising'] }
   ];
 
+  // ---- coursework data (student detail) ----
+  // tags drive the colored tabs on each row: 'eng' (engineering, maroon) and
+  // 'des' (design, gold). list both to give a course two tabs side by side.
+  var courses = [
+    { name: 'data structures',             code: 'cse 214', tags: ['eng'] },
+    { name: 'algorithms',                  code: 'cse 373', tags: ['eng'] },
+    { name: 'databases',                   code: 'cse 305', tags: ['eng'] },
+    { name: 'machine learning',            code: 'cse 353', tags: ['eng'] },
+    { name: 'natural language processing', code: 'cse 354', tags: ['eng'] },
+    { name: 'data science',                code: 'ams 325', tags: ['eng'] },
+    { name: 'ux & interaction design',     code: 'dia 311', tags: ['des'] },
+    { name: 'computer graphics',           code: 'cse 328', tags: ['eng', 'des'] },
+    { name: '2d game programming',         code: 'cse 380', tags: ['eng', 'des'] }
+  ];
+  var skills = [
+    { name: 'react',    tags: ['eng'] },
+    { name: 'python',   tags: ['eng'] },
+    { name: 'postgres', tags: ['eng'] },
+    { name: 'pytorch',  tags: ['eng'] },
+    { name: 'figma',    tags: ['des'] },
+    { name: 'adobe cc', tags: ['des'] }
+  ];
+
+  // colored category tabs shared by course + skill rows
+  function tabsHtml(tags) {
+    return '<div class="course__tabs">' + tags.map(function (t) {
+      return '<span class="course__tab course__tab--' + t + '"></span>';
+    }).join('') + '</div>';
+  }
+  function courseRow(c) {
+    return '<div class="course">' + tabsHtml(c.tags) +
+      '<div class="course__name">' + esc(c.name) + '</div>' +
+      '<div class="course__meta">' + esc(c.code) + '</div>' +
+    '</div>';
+  }
+  function skillPill(s) {
+    return '<span class="skill">' +
+      '<span class="skill__cube skill__cube--' + s.tags[0] + '"></span>' +
+      esc(s.name) +
+    '</span>';
+  }
+
   function activityRow(it, key) {
     var tags = it.tags.map(function (t) {
       return '<span class="tag">' + esc(t) + '</span>';
@@ -114,6 +156,12 @@
     work.map(function (it, i) { return activityRow(it, 'w' + i); }).join(''));
   panelEls[2].querySelector('[data-group="extra"]').insertAdjacentHTML('afterend',
     extra.map(function (it, i) { return activityRow(it, 'e' + i); }).join(''));
+
+  // student panel: course rows + the skills marquee (rendered into both groups
+  // so the track loops seamlessly)
+  panelEls[1].querySelector('[data-courses]').innerHTML = courses.map(courseRow).join('');
+  var skillsHtml = skills.map(skillPill).join('');
+  panelEls[1].querySelectorAll('[data-skills]').forEach(function (g) { g.innerHTML = skillsHtml; });
 
   // about panel: clicking the underlined text swaps in a random action
   // (never the same one twice in a row)
