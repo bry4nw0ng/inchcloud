@@ -50,18 +50,32 @@
   ];
 
   // ---- coursework data (student detail) ----
-  // tags drive the colored tabs on each row: 'eng' (engineering, maroon) and
-  // 'des' (design, gold). list both to give a course two tabs side by side.
+  // tags drive the colored tab on each row: 'eng' (cs, maroon) and
+  // 'des' (design, gold). list both to split the tab (top half / bottom half).
   var courses = [
-    { name: 'data structures',             code: 'cse 214', tags: ['eng'] },
-    { name: 'algorithms',                  code: 'cse 373', tags: ['eng'] },
-    { name: 'databases',                   code: 'cse 305', tags: ['eng'] },
-    { name: 'machine learning',            code: 'cse 353', tags: ['eng'] },
-    { name: 'natural language processing', code: 'cse 354', tags: ['eng'] },
-    { name: 'data science',                code: 'ams 325', tags: ['eng'] },
-    { name: 'ux & interaction design',     code: 'dia 311', tags: ['des'] },
-    { name: 'computer graphics',           code: 'cse 328', tags: ['eng', 'des'] },
-    { name: '2d game programming',         code: 'cse 380', tags: ['eng', 'des'] }
+    // cs
+    { name: 'oop',                           code: 'cse 114',     tags: ['eng'] },
+    { name: 'data structures',               code: 'cse 214',     tags: ['eng'] },
+    { name: 'foundations of cs',             code: 'cse 215',     tags: ['eng'] },
+    { name: 'programming abstractions',      code: 'cse 216',     tags: ['eng'] },
+    { name: 'systems fundamentals',          code: 'cse 220/320', tags: ['eng'] },
+    { name: 'theory of computation',         code: 'cse 303',     tags: ['eng'] },
+    { name: 'computing ethics & law',        code: 'cse 312',     tags: ['eng'] },
+    { name: 'scripting languages',           code: 'cse 337',     tags: ['eng'] },
+    { name: 'technical communication',       code: 'cse 300',     tags: ['eng'] },
+    { name: 'computer networks',             code: 'cse 310',     tags: ['eng'] },
+    { name: 'data science',                  code: 'cse 351',     tags: ['eng'] },
+    { name: 'nlp',                           code: 'cse 354',     tags: ['eng'] },
+    { name: 'algorithms',                    code: 'cse 373',     tags: ['eng'] },
+    { name: 'python fintech, ai & cloud',    code: 'ise 391',     tags: ['eng'] },
+    { name: 'machine learning',              code: 'cse 353',     tags: ['eng'] },
+    // both
+    { name: 'software development',          code: 'cse 316',     tags: ['eng', 'des'] },
+    { name: 'software engineering',          code: 'cse 416',     tags: ['eng', 'des'] },
+    { name: 'web design & culture',          code: 'ars 327',     tags: ['eng', 'des'] },
+    // design
+    { name: 'digital art',                   code: 'ars 225',     tags: ['des'] },
+    { name: 'digital media history/theory',  code: 'arh 207',     tags: ['des'] }
   ];
   var skills = [
     { name: 'react',    tags: ['eng'] },
