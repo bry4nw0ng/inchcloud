@@ -6,7 +6,7 @@ inchcloud.com
 ## Roadmap
 
 - [x] about me
-- [ ] education
+- [x] education
 - [ ] work experience
 - [ ] projects
 - [ ] casb
