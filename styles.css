@@ -499,7 +499,13 @@ a { color: inherit; }
 .proj + .proj { margin-top: 0; }
 .proj--first { margin-bottom: 24px; }
 .proj__head { display: flex; justify-content: space-between; align-items: baseline; }
+.proj__title { display: inline-flex; align-items: center; gap: 7px; }
 .proj__name { font-size: 20px; font-weight: 600; }
+.proj__gh { display: inline-flex; color: #8a8576; transition: color .15s ease, transform .15s ease; }
+.proj__gh:hover { color: #1a1a1a; transform: translateY(-1px); }
+.proj__gh svg { display: block; }
+.proj__play { font-family: 'Space Mono', monospace; font-size: 11px; color: #8a8576; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; transition: color .15s ease; }
+.proj__play:hover { color: #1a1a1a; }
 .proj__date { font-family: 'Space Mono', monospace; font-size: 11px; color: #8a8576; }
 .proj__stack { font-family: 'Space Mono', monospace; font-size: 11.5px; color: #6c6859; margin-top: 3px; }
 .proj__desc { font-size: 14px; line-height: 1.65; margin: 11px 0 0; text-wrap: pretty; }
