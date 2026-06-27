@@ -148,7 +148,7 @@ a { color: inherit; }
   height: 300px;
   border-radius: 16px;
   padding: 20px 22px;
-  background: #d8cdba url(assets/nyc-skyline.png) left bottom / cover no-repeat;
+  background: #d8cdba url(assets/passes/nyc-skyline.png) left bottom / cover no-repeat;
   color: #2b2419;
   overflow: hidden;
 }
@@ -180,7 +180,7 @@ a { color: inherit; }
   height: 300px;
   border-radius: 16px;
   padding: 20px 22px;
-  background: #990000 url(assets/sbu-card.png) center / cover no-repeat;
+  background: #990000 url(assets/passes/sbu-card.png) center / cover no-repeat;
   color: #fff;
   display: flex;
   flex-direction: column;

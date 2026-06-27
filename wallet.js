@@ -27,24 +27,24 @@
 
   // ---- activity data (work detail) ----
   var work = [
-    { logo: 'assets/assurant.jpeg', company: 'assurant', role: 'global tax tech & operations intern', dates: '07/25 — 05/26',
+    { logo: 'assets/logos/assurant.jpeg', company: 'assurant', role: 'global tax tech & operations intern', dates: '07/25 — 05/26',
       desc: "automating the global tax team's manual reconciliation workflows — and building the dashboards that keep them honest.",
       tags: ['python', 'sql', 'excel automation'] },
-    { logo: 'assets/sbu.jpeg', company: 'stony brook university', role: 'software engineering intern · hr dept', dates: '02/25 — 05/25',
+    { logo: 'assets/logos/sbu.jpeg', company: 'stony brook university', role: 'software engineering intern · hr dept', dates: '02/25 — 05/25',
       desc: "shipping features and fixes across the department's internal web apps — and keeping the team's site and tooling alive.",
       tags: ['javascript', 'php', 'mysql'] },
-    { logo: 'assets/nobledesktop.jpeg', company: 'noble desktop', role: 'python teaching assistant', dates: '07/24 — 08/24',
+    { logo: 'assets/logos/nobledesktop.jpeg', company: 'noble desktop', role: 'python teaching assistant', dates: '07/24 — 08/24',
       desc: "walking high-schoolers through their first python programs — labs, office hours, and a lot of debugging side by side.",
       tags: ['python', 'pygame', 'teaching'] }
   ];
   var extra = [
-    { logo: 'assets/google.jpeg', company: 'google & basta', role: 'software engineering fellow', dates: '09/25 — 12/25',
+    { logo: 'assets/logos/google.jpeg', company: 'google & basta', role: 'software engineering fellow', dates: '09/25 — 12/25',
       desc: 'a 10-week fellowship built on pair programming, mentored one-on-one by a google senior swe.',
       tags: ['pair programming', 'mentorship'] },
-    { logo: 'assets/bnl.jpeg', company: 'brookhaven national laboratory', role: 'diversity professional leadership network extern', dates: '08/24 — 05/25',
+    { logo: 'assets/logos/bnl.jpeg', company: 'brookhaven national laboratory', role: 'diversity professional leadership network extern', dates: '08/24 — 05/25',
       desc: 'job shadows plus 1:1 coaching — a year of watching how real engineering teams actually work.',
       tags: ['job shadow', 'coaching'] },
-    { logo: 'assets/casb.png', company: 'chinese association at stony brook', role: 'webmaster · fundraising chair · graphic designer', dates: '2022 — 2026',
+    { logo: 'assets/logos/casb.png', company: 'chinese association at stony brook', role: 'webmaster · fundraising chair · graphic designer', dates: '2022 — 2026',
       desc: 'webmaster now, fundraising chair (raised $1,000+), and before that the graphic designer — ran the site, ran the money, and made the posters.',
       tags: ['leadership', 'design', 'fundraising'] }
   ];
