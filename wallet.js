@@ -3,7 +3,7 @@
 
   var PEEK = 58;
   var N = 6;
-  var state = { focused: null, act: null };
+  var state = { focused: null, act: {} };
 
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -140,7 +140,7 @@
   var back = document.createElement('div');
   back.className = 'back-btn';
   back.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c1c1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>';
-  back.addEventListener('click', function () { state.focused = null; state.act = null; apply(); });
+  back.addEventListener('click', function () { state.focused = null; state.act = {}; apply(); });
   wallet.appendChild(back);
 
   var cardEls = [];
@@ -152,7 +152,7 @@
       card.appendChild(tmpl('face-' + idx));
       card.addEventListener('click', function () {
         state.focused = (state.focused === idx) ? null : idx;
-        state.act = null;
+        state.act = {};
         apply();
       });
       wallet.appendChild(card);
@@ -259,7 +259,7 @@
   panelEls[2].querySelectorAll('[data-acttoggle]').forEach(function (el) {
     var key = el.getAttribute('data-acttoggle');
     el.addEventListener('click', function () {
-      state.act = (state.act === key) ? null : key;
+      if (state.act[key]) { delete state.act[key]; } else { state.act[key] = true; }
       apply();
     });
   });
@@ -308,7 +308,7 @@
     if (state.focused === 0) lockShuffleHeight();
 
     panelEls[2].querySelectorAll('[data-actrow]').forEach(function (row) {
-      row.classList.toggle('is-open', state.act === row.getAttribute('data-actrow'));
+      row.classList.toggle('is-open', !!state.act[row.getAttribute('data-actrow')]);
     });
   }
 
