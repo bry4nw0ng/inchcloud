@@ -369,4 +369,59 @@
   function go() { if (!started) { started = true; startEntrance(); } }
   preloadCardImages().then(go);
   window.setTimeout(go, 1200);
+
+  // ---- project videos: click-to-play posters + polite background buffering ----
+  // each .proj__media shows a paper poster tile over a lazy <video>. clicking
+  // the tile reveals and plays the (by-then hopefully buffered) clip. separately
+  // we warm the clips in the background — after the intro, one at a time, and
+  // never on slow/metered connections — so they're ready by the time the user
+  // reaches the projects card.
+  var medias = Array.prototype.slice.call(document.querySelectorAll('[data-media]'));
+
+  medias.forEach(function (m) {
+    var vid = m.querySelector('[data-vid]');
+    var poster = m.querySelector('[data-poster]');
+    if (!vid || !poster) return;
+    poster.addEventListener('click', function () {
+      m.classList.add('is-playing');
+      vid.preload = 'auto';
+      vid.play().catch(function () {});
+    });
+  });
+
+  function warmVideos() {
+    // respect data-saver and slow connections — don't pull ~100MB unasked
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+
+    var vids = medias.map(function (m) { return m.querySelector('[data-vid]'); })
+      .filter(Boolean);
+    var i = 0;
+    (function next() {
+      if (i >= vids.length) return;
+      var v = vids[i++];
+      // user already tapped play on this one? its own playback is buffering it
+      if (v.preload === 'auto') { next(); return; }
+      v.preload = 'auto';
+      var done = false;
+      function advance() {
+        if (done) return;
+        done = true;
+        window.clearTimeout(cap);
+        next();
+      }
+      // move to the next once this one can play through, on error, or after a
+      // cap so one big/slow file can't block the rest forever
+      v.addEventListener('canplaythrough', advance, { once: true });
+      v.addEventListener('error', advance, { once: true });
+      var cap = window.setTimeout(advance, 20000);
+      v.load();
+    })();
+  }
+
+  if (medias.length) {
+    var idle = window.requestIdleCallback || function (fn) { return window.setTimeout(fn, 1); };
+    // let the intro breathe before we start pulling video bytes
+    window.setTimeout(function () { idle(warmVideos); }, 2000);
+  }
 })();
