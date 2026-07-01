@@ -17,12 +17,13 @@
     'conquering the planet',
     'thinking about getting a second bowl of chipotle',
     'trying out random tft comps',
-    'learning bowser/terry combos',
+    'practicing bowser/terry combos',
     'getting lost in a fan-made pokemon rom hack',
     'exploring a minecraft modpack',
     'launching threes with more confidence than accuracy',
-    'training to hit 185 bench before the end of the year',
+    'training to hit 185 bench press before the end of the year',
     'looking for a festival set to leave in the background',
+    'tinkering with this website',
   ];
 
   // ---- activity data (work detail) ----
@@ -320,14 +321,52 @@
     // stagger by stack position so the cards fan in instead of moving as one
     cardEls[j].style.transitionDelay = ((N - 1 - j) * 0.06) + 's';
   }
+  // reserve the wallet's resting height now (cards are absolutely positioned,
+  // so without this the wallet collapses until apply() runs — which, with the
+  // preload below, is late enough that the footer visibly rides up to the top
+  // and then snaps back down once the cards start falling in)
+  wallet.style.height = (5 * PEEK + 314) + 'px';
+
   // commit the seeded state before the transition runs
   void wallet.offsetHeight;
 
-  requestAnimationFrame(function () {
-    apply();
-    // clear the stagger so it doesn't bleed into focus/back animations
-    window.setTimeout(function () {
-      for (var k = 0; k < N; k++) cardEls[k].style.transitionDelay = '';
-    }, 900);
-  });
+  // the card faces' images live inside <template>s, so the browser doesn't
+  // fetch them until the faces are cloned into the DOM (just above). if we
+  // animate right away the cards slide up with empty <img> slots and the art
+  // "blinks" in once it decodes. so: preload every card image, then start the
+  // slide-up once they're all ready — with a timeout fallback so a slow or
+  // broken image can never stall the intro.
+  function preloadCardImages() {
+    var imgs = [];
+    for (var i = 0; i < N; i++) {
+      cardEls[i].querySelectorAll('img').forEach(function (img) { imgs.push(img); });
+    }
+    return Promise.all(imgs.map(function (img) {
+      // decode() waits for the pixels, not just the response; if it's already
+      // loaded this resolves instantly. swallow errors so one bad image can't
+      // reject the whole batch.
+      if (img.decode) return img.decode().catch(function () {});
+      if (img.complete) return Promise.resolve();
+      return new Promise(function (res) {
+        img.addEventListener('load', res, { once: true });
+        img.addEventListener('error', res, { once: true });
+      });
+    }));
+  }
+
+  function startEntrance() {
+    requestAnimationFrame(function () {
+      apply();
+      // clear the stagger so it doesn't bleed into focus/back animations
+      window.setTimeout(function () {
+        for (var k = 0; k < N; k++) cardEls[k].style.transitionDelay = '';
+      }, 900);
+    });
+  }
+
+  // race the preload against a cap so the intro always plays promptly
+  var started = false;
+  function go() { if (!started) { started = true; startEntrance(); } }
+  preloadCardImages().then(go);
+  window.setTimeout(go, 1200);
 })();
