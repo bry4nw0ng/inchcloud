@@ -79,12 +79,19 @@
     { name: 'digital media history/theory',  code: 'arh 207',     tags: ['des'] }
   ];
   var skills = [
-    { name: 'react',    tags: ['eng'] },
-    { name: 'python',   tags: ['eng'] },
-    { name: 'postgres', tags: ['eng'] },
-    { name: 'pytorch',  tags: ['eng'] },
-    { name: 'figma',    tags: ['des'] },
-    { name: 'adobe cc', tags: ['des'] }
+    { name: 'python',     tags: ['eng'] },
+    { name: 'java',       tags: ['eng'] },
+    { name: 'javascript', tags: ['eng'] },
+    { name: 'c',          tags: ['eng'] },
+    { name: 'react',      tags: ['eng'] },
+    { name: 'pytorch',    tags: ['eng'] },
+    { name: 'numpy',      tags: ['eng'] },
+    { name: 'pandas',     tags: ['eng'] },
+    { name: 'sql',        tags: ['eng'] },
+    { name: 'git',        tags: ['eng'] },
+    { name: 'figma',      tags: ['des'] },
+    { name: 'canva',      tags: ['des'] },
+    { name: 'adobe cc',   tags: ['des'] }
   ];
 
   // colored category tabs shared by course + skill rows
