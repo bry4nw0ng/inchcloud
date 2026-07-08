@@ -34,7 +34,7 @@
     { logo: 'assets/logos/sbu.jpeg', company: 'stony brook university', role: 'software engineering intern · hr dept', dates: '02/25 — 05/25',
       desc: "automated how the hr website's calendars got updated. wrote php and python scripts for auto-deploys and log metrics. used silktide to make the site more accessible and lift its ux score. the rest was upkeep, fixing broken links as things changed and updating pages through omni cms.",
       tags: ['js', 'php', 'python', 'cms', 'silktide'] },
-    { logo: 'assets/logos/nobledesktop.jpeg', company: 'noble desktop', role: 'python teaching assistant', dates: '07/24 — 08/24',
+    { logo: 'assets/logos/nobledesktop.jpeg', company: 'noble desktop', role: 'python teaching assistant', dates: '07/24 — 08/24 · 06/26 — 07/26',
       desc: "helped teach python to students from high school through university, online and in person. ran sessions on python basics, data science, and machine learning, with a lot of debugging side by side.",
       tags: ['python', 'numpy', 'pandas', 'seaborn', 'sklearn'] }
   ];
