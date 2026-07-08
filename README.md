@@ -7,8 +7,8 @@ inchcloud.com
 
 - [x] about me
 - [x] education
-- [ ] work experience - wip
-- [ ] projects - wip
+- [x] work experience
+- [x] projects 
 - [ ] casb
 - [ ] more about me
 
