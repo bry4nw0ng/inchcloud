@@ -46,6 +46,12 @@
     { logo: 'assets/logos/casb.png', company: 'chinese association at stony brook', role: 'webmaster · fundraising chair · graphic designer', dates: '2022 — 2026',
       desc: "spent all four undergrad years spreading chinese culture on campus through events, fundraisers, and collaborations with other clubs. served as webmaster, fundraising chair, graphic designer, and representative along the way." }
   ];
+  var education = [
+    { logo: 'assets/logos/sbu2.png', company: 'stony brook university', role: 'b.s. computer science · minor digital arts', dates: '08/22 — 05/26',
+      desc: "studied computer science with a digital arts minor. more on the coursework and skills over in the student pass." },
+    { logo: 'assets/logos/stuy.jpeg', company: 'stuyvesant high school', role: 'high school diploma', dates: '09/18 — 06/22',
+      desc: "one of nyc's specialized public high schools, where the cs classes first got me hooked on building things." }
+  ];
 
   // ---- coursework data (student detail) ----
   // tags drive the colored tab on each row: 'eng' (cs, maroon) and
@@ -175,6 +181,8 @@
     work.map(function (it, i) { return activityRow(it, 'w' + i); }).join(''));
   panelEls[2].querySelector('[data-group="extra"]').insertAdjacentHTML('afterend',
     extra.map(function (it, i) { return activityRow(it, 'e' + i); }).join(''));
+  panelEls[2].querySelector('[data-group="education"]').insertAdjacentHTML('afterend',
+    education.map(function (it, i) { return activityRow(it, 'ed' + i); }).join(''));
 
   // student panel: course rows + the skills marquee (rendered into both groups
   // so the track loops seamlessly)
