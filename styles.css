@@ -111,6 +111,21 @@ a { color: inherit; }
               top .6s cubic-bezier(.22, 1, .36, 1);
 }
 
+/* desktop hover — the card slides a little further out of the wallet.
+   the lift lives on the face (the card's only child), not on .card itself:
+   JS owns .card's inline transform for the stack/fan animation.
+   gated on hover:hover + pointer:fine so touch devices never get a stuck
+   hover state; the strip a card exposes is its only hittable area, since
+   the card in front of it covers the rest. */
+@media (hover: hover) and (pointer: fine) {
+  .card > * { transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+  .wallet:not(.is-active) .card:hover > * { transform: translateY(-10px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card > * { transition: none; }
+  .wallet:not(.is-active) .card:hover > * { transform: none; }
+}
+
 /* ============================================================
    card faces
    ============================================================ */
