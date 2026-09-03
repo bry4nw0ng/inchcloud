@@ -10,8 +10,32 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+
+<!-- the cloud is the first thing on screen, so it goes first: head preloads
+     outrank an <img> in the body, and the card art below is heavy enough to
+     starve it if it queued behind. -->
+<link rel="preload" as="image" href="assets/logos/inchcloud.png" fetchpriority="high">
+
+<!-- the card faces live inside <template>s below, and template content is
+     inert — the browser won't fetch any of this until wallet.js clones the
+     faces into the DOM. these hints start the downloads during html parse
+     instead, so the art is usually decoded by the time the intro runs.
+     the last two are css background-images, which are just as inert. -->
+<link rel="preload" as="image" href="assets/passes/bryan-id.jpg">
+<link rel="preload" as="image" href="assets/passes/bryan-grad.jpg">
+<link rel="preload" as="image" href="assets/passes/projects-card.png">
+<link rel="preload" as="image" href="assets/passes/casb-photo.png">
+<link rel="preload" as="image" href="assets/passes/boarding-pass.png">
+<link rel="preload" as="image" href="assets/passes/nyc-skyline.png">
+<link rel="preload" as="image" href="assets/passes/sbu-card.png">
 </head>
 <body>
+
+  <!-- visible from first paint via css; wallet.js fades it out once the card
+       art has decoded and the cloud has had its minimum beat. -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <img class="preloader__mark" src="assets/logos/inchcloud.png" alt="" draggable="false">
+  </div>
 
   <header class="wallet-header">
     <div class="wallet-header__kicker">bryan's digital wallet</div>

@@ -350,62 +350,113 @@
   }
 
   // ---- initial load-in: every card slides up from the bottom ----
-  // seed each card below its resting spot, then let apply() animate it home
+  measure();
+
+  // seed each card at its final `top` but pushed below the wallet, so the only
+  // things the intro animates are transform + opacity. (setting `top` for the
+  // first time inside the entrance would snap instead of animating — a
+  // transition can't interpolate from `auto` — and that snap, happening
+  // mid-slide, is what made the fan-out look jumbled.)
   for (var j = 0; j < N; j++) {
+    var seedPos = N - 1 - j;
+    cardEls[j].style.top = (seedPos * geo.peek) + 'px';
+    cardEls[j].style.zIndex = String(seedPos + 1);
     cardEls[j].style.transform = 'translateY(135%)';
     cardEls[j].style.opacity = '0';
     // stagger by stack position so the cards fan in instead of moving as one
-    cardEls[j].style.transitionDelay = ((N - 1 - j) * 0.06) + 's';
+    cardEls[j].style.transitionDelay = (seedPos * 0.06) + 's';
   }
   // reserve the wallet's resting height now (cards are absolutely positioned,
   // so without this the wallet collapses until apply() runs — which, with the
   // preload below, is late enough that the footer visibly rides up to the top
   // and then snaps back down once the cards start falling in)
-  measure();
   wallet.style.height = restingHeight() + 'px';
 
   // commit the seeded state before the transition runs
   void wallet.offsetHeight;
 
-  // the card faces' images live inside <template>s, so the browser doesn't
-  // fetch them until the faces are cloned into the DOM (just above). if we
-  // animate right away the cards slide up with empty <img> slots and the art
-  // "blinks" in once it decodes. so: preload every card image, then start the
-  // slide-up once they're all ready — with a timeout fallback so a slow or
-  // broken image can never stall the intro.
-  function preloadCardImages() {
-    var imgs = [];
-    for (var i = 0; i < N; i++) {
-      cardEls[i].querySelectorAll('img').forEach(function (img) { imgs.push(img); });
-    }
-    return Promise.all(imgs.map(function (img) {
-      // decode() waits for the pixels, not just the response; if it's already
-      // loaded this resolves instantly. swallow errors so one bad image can't
-      // reject the whole batch.
-      if (img.decode) return img.decode().catch(function () {});
-      if (img.complete) return Promise.resolve();
+  // ---- preloader gate ----
+  // the faces live inside <template>s and two of them are css backgrounds, so
+  // none of this art is fetched until the faces are cloned into the DOM. the
+  // <link rel="preload"> hints in index.html start the downloads earlier; this
+  // gate makes sure we don't animate until they've actually decoded.
+  //
+  // listed explicitly rather than scraped from the DOM: querySelectorAll('img')
+  // silently misses nyc-skyline and sbu-card, which are background-images.
+  var FACE_IMAGES = [
+    'assets/passes/nyc-skyline.png',
+    'assets/passes/bryan-id.jpg',
+    'assets/passes/sbu-card.png',
+    'assets/passes/bryan-grad.jpg',
+    'assets/passes/projects-card.png',
+    'assets/passes/casb-photo.png',
+    'assets/passes/boarding-pass.png'
+  ];
+
+  var MIN_SHOWN = 1500;   // the cloud always gets its full beat, even on a warm
+                          // cache where the art is ready immediately
+  var MAX_WAIT  = 4000;   // a 404 or a stalled network must never trap the user
+
+  function preloadFaces() {
+    return Promise.all(FACE_IMAGES.map(function (src) {
       return new Promise(function (res) {
-        img.addEventListener('load', res, { once: true });
-        img.addEventListener('error', res, { once: true });
+        var img = new Image();
+        img.src = src;
+        // decode() waits for pixels, not just bytes, and resolves instantly if
+        // the image is already cached. res on failure too — one broken file
+        // must not hold the whole batch.
+        if (img.decode) { img.decode().then(res, res); }
+        else { img.onload = img.onerror = res; }
       });
     }));
   }
 
+  var entranceStarted = false;
+
   function startEntrance() {
+    entranceStarted = true;
     requestAnimationFrame(function () {
       apply();
-      // clear the stagger so it doesn't bleed into focus/back animations
-      window.setTimeout(function () {
+      // clear the stagger so it doesn't bleed into focus/back animations.
+      // driven off the last card's own transition rather than a fixed timer,
+      // which previously left the delays live if the user tapped early.
+      var last = cardEls[0];   // stack position N-1 — the biggest delay
+      var cleared = false;
+      function clearDelays(e) {
+        // transitionend fires per property; opacity (.4s) lands before
+        // transform (.6s), and rewriting transition-delay on an in-flight
+        // transform would restart it. wait for the transform specifically.
+        if (e && e.propertyName !== 'transform') return;
+        if (cleared) return;
+        cleared = true;
+        last.removeEventListener('transitionend', clearDelays);
         for (var k = 0; k < N; k++) cardEls[k].style.transitionDelay = '';
-      }, 900);
+      }
+      last.addEventListener('transitionend', clearDelays);
+      window.setTimeout(clearDelays, 1400);   // backstop if the event is missed
     });
   }
 
-  // race the preload against a cap so the intro always plays promptly
-  var started = false;
-  function go() { if (!started) { started = true; startEntrance(); } }
-  preloadCardImages().then(go);
-  window.setTimeout(go, 1200);
+  var preloader = document.getElementById('preloader');
+  var shownAt = Date.now();   // it is already on screen — css shows it by default
+  var settled = false;
+
+  function finish() {
+    if (settled) return;
+    settled = true;
+    // hold the cloud for its full beat even if the art was ready instantly,
+    // then cross its fade with the cards rising so the two overlap rather
+    // than play back to back
+    var held = Math.max(0, MIN_SHOWN - (Date.now() - shownAt));
+    window.setTimeout(function () {
+      preloader.classList.add('is-done');
+      window.setTimeout(startEntrance, 200);
+      window.setTimeout(function () { preloader.classList.add('is-gone'); }, 500);
+    }, held);
+  }
+
+  preloadFaces().then(finish);
+  window.setTimeout(finish, MAX_WAIT);
 
   // the card's height follows the wallet's width, so a rotation or window drag
   // changes the whole stack's spacing — remeasure and re-lay-out. coalesced
@@ -418,7 +469,7 @@
       measure();
       // before the intro fires the cards are still seeded off-screen; just keep
       // the reserved height honest rather than starting the entrance early
-      if (started) { apply(); }
+      if (entranceStarted) { apply(); }
       else { wallet.style.height = restingHeight() + 'px'; }
     });
   });

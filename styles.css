@@ -22,6 +22,42 @@ a { color: inherit; }
 /* shared mono eyebrow tone */
 .mono { font-family: 'Space Mono', monospace; }
 
+/* ---- preloader ----
+   the wallet's whole charm is the cards fanning in, and that only reads right
+   if the art has already decoded. rather than race a timeout and risk cards
+   flying in empty, we hold this over the page until the faces are ready.
+   visible from the very first paint (no js needed to show it) so the header
+   and footer never flash behind it; wallet.js only ever takes it away.
+   safe to default-on: without js the templates are never cloned, so there is
+   no wallet to reveal anyway. */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(0.97 0.006 95);   /* same as body — no seam on fade-out */
+  opacity: 1;
+  transition: opacity .45s ease;
+}
+.preloader.is-done { opacity: 0; pointer-events: none; }
+.preloader.is-gone { display: none; }
+
+.preloader__mark {
+  width: 72px;
+  height: 72px;
+  user-select: none;
+  animation: cloud-breathe 1.9s ease-in-out infinite;
+}
+@keyframes cloud-breathe {
+  0%, 100% { transform: scale(1);    opacity: .38; }
+  50%      { transform: scale(1.06); opacity: .72; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preloader__mark { animation: none; opacity: .55; }
+}
+
 /* ---- header ---- */
 .wallet-header { width: min(480px, 100%); margin-bottom: 30px; }
 .wallet-header__kicker {
