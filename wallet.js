@@ -1,8 +1,32 @@
 (function () {
   "use strict";
 
-  var PEEK = 58;
   var N = 6;
+
+  // ---- geometry ----
+  // the card is 8/5 in css (aspect-ratio on every face), matching the art.
+  // everything else is expressed as a fraction of the card so the stack scales
+  // with the viewport instead of assuming the 480×300 desktop size.
+  var RATIO = 8 / 5;           // card width : height
+  var PEEK_RATIO = 58 / 300;   // exposed strip per stacked card, as a fraction
+  var SLACK = 14;              // fixed breathing room under the stack
+  var geo = { cardH: 300, peek: 58 };
+
+  function measure() {
+    // derived from the wallet's width rather than read off a card: the intro
+    // seeds card positions before anything has painted, so there is no laid-out
+    // card to measure yet.
+    var w = wallet.clientWidth;
+    if (w) {
+      geo.cardH = w / RATIO;
+      geo.peek = geo.cardH * PEEK_RATIO;
+    }
+    return geo;
+  }
+  function restingHeight() {
+    return (N - 1) * geo.peek + geo.cardH + SLACK;
+  }
+
   var state = { focused: null, act: {} };
 
   function esc(s) {
@@ -283,7 +307,7 @@
     var f = state.focused;
     el.style.zIndex = String(stackPos + 1);
     if (f === null) {
-      el.style.top = (stackPos * PEEK) + 'px';
+      el.style.top = (stackPos * geo.peek) + 'px';
       el.style.transform = 'translateY(0)';
       el.style.opacity = '1';
       el.style.pointerEvents = 'auto';
@@ -298,7 +322,7 @@
       return;
     }
     var up = stackPos < (N - 1 - f);
-    el.style.top = (stackPos * PEEK) + 'px';
+    el.style.top = (stackPos * geo.peek) + 'px';
     el.style.transform = 'translateY(' + (up ? '-135%' : '135%') + ')';
     el.style.opacity = '0';
     el.style.pointerEvents = 'none';
@@ -309,7 +333,7 @@
     wallet.classList.toggle('is-active', active);
     // active: let the open panel (now in normal flow) drive the wallet's height
     // so the whole page scrolls — no fixed box, no inner scrollbar
-    wallet.style.height = active ? 'auto' : (5 * PEEK + 314) + 'px';
+    wallet.style.height = active ? 'auto' : restingHeight() + 'px';
 
     for (var i = 0; i < N; i++) {
       positionCard(cardEls[i], i);
@@ -337,7 +361,8 @@
   // so without this the wallet collapses until apply() runs — which, with the
   // preload below, is late enough that the footer visibly rides up to the top
   // and then snaps back down once the cards start falling in)
-  wallet.style.height = (5 * PEEK + 314) + 'px';
+  measure();
+  wallet.style.height = restingHeight() + 'px';
 
   // commit the seeded state before the transition runs
   void wallet.offsetHeight;
@@ -381,6 +406,22 @@
   function go() { if (!started) { started = true; startEntrance(); } }
   preloadCardImages().then(go);
   window.setTimeout(go, 1200);
+
+  // the card's height follows the wallet's width, so a rotation or window drag
+  // changes the whole stack's spacing — remeasure and re-lay-out. coalesced
+  // into one frame because resize fires continuously while dragging.
+  var resizeRaf = 0;
+  window.addEventListener('resize', function () {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(function () {
+      resizeRaf = 0;
+      measure();
+      // before the intro fires the cards are still seeded off-screen; just keep
+      // the reserved height honest rather than starting the entrance early
+      if (started) { apply(); }
+      else { wallet.style.height = restingHeight() + 'px'; }
+    });
+  });
 
   // ---- project videos: click-to-play posters + polite background buffering ----
   // each .proj__media shows a paper poster tile over a lazy <video>. clicking

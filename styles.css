@@ -100,11 +100,16 @@ a { color: inherit; }
 }
 .wallet.is-active .back-btn { opacity: 1; pointer-events: auto; }
 
-/* card wrapper — top / z-index / transform / opacity are set inline by JS */
+/* card wrapper — top / z-index / transform / opacity are set inline by JS.
+   container-type makes this the reference box for the cqw units the faces use:
+   1cqw = 1% of the card's width, so everything inside a card scales with it.
+   inline-size (not size) — full size containment would break the faces'
+   aspect-ratio, which needs to resolve height from width. */
 .card {
   position: absolute;
   left: 0;
   right: 0;
+  container-type: inline-size;
   cursor: pointer;
   transition: transform .6s cubic-bezier(.22, 1, .36, 1),
               opacity .4s ease,
@@ -130,21 +135,27 @@ a { color: inherit; }
    card faces
    ============================================================ */
 
+/* every face is 8/5 — the same ratio as the art (960×600), so the card scales
+   with the wallet instead of staying 300px tall and cropping its own image.
+   at the 480px desktop width this resolves to exactly 300px, unchanged.
+   the cqw values below are all calibrated against that 480px card
+   (1cqw = 4.8px there), so desktop renders identically to before. */
+
 /* full-bleed image cards (projects / club / boarding) */
-.card-img { display: block; width: 100%; height: 300px; }
-.card-img--projects { object-fit: cover; border-radius: 8px; }
+.card-img { display: block; width: 100%; aspect-ratio: 8 / 5; height: auto; }
+.card-img--projects { object-fit: cover; border-radius: 1.667cqw; }
 .card-img--club { object-fit: contain; }
-.card-img--boarding { object-fit: cover; border-radius: 16px; }
+.card-img--boarding { object-fit: cover; border-radius: 3.333cqw; }
 
 /* shared id photo (nyc + student) */
 .id-photo {
   position: absolute;
-  left: 22px;
-  bottom: 17px;
-  width: 155px;
-  height: 216px;
+  left: 4.583cqw;
+  bottom: 3.542cqw;
+  width: 32.292cqw;
+  height: 45cqw;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 1.667cqw;
 }
 .id-photo--nyc {
   object-position: center 20%;
@@ -160,31 +171,34 @@ a { color: inherit; }
 /* 0 — nyc id */
 .card-nyc {
   position: relative;
-  height: 300px;
-  border-radius: 16px;
-  padding: 20px 22px;
+  aspect-ratio: 8 / 5;
+  border-radius: 3.333cqw;
+  padding: 4.167cqw 4.583cqw;
   background: #d8cdba url(assets/passes/nyc-skyline.png) left bottom / cover no-repeat;
   color: #2b2419;
   overflow: hidden;
 }
+/* type scales with the card, but clamped so it never outgrows the desktop size
+   (the max) and never shrinks past legibility on a narrow phone (the min).
+   letter-spacing is in em so it tracks whichever size the clamp resolves to. */
 .card-nyc__name {
   font-family: 'Space Mono', monospace;
-  font-size: 21px;
-  letter-spacing: .5px;
+  font-size: clamp(14px, 4.375cqw, 21px);
+  letter-spacing: .024em;
   font-weight: 700;
   line-height: 1;
   color: #493724;
 }
 .card-nyc__badge {
   position: absolute;
-  right: 13px;
-  bottom: 17px;
+  right: 2.708cqw;
+  bottom: 3.542cqw;
   font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 1px;
+  font-size: clamp(8px, 2.083cqw, 10px);
+  letter-spacing: .1em;
   color: #f4efe4;
   background: rgba(40, 30, 20, .55);
-  padding: 4px 9px;
+  padding: .4em .9em;
   border-radius: 999px;
   backdrop-filter: blur(2px);
 }
@@ -192,9 +206,9 @@ a { color: inherit; }
 /* 1 — student */
 .card-student {
   position: relative;
-  height: 300px;
-  border-radius: 16px;
-  padding: 20px 22px;
+  aspect-ratio: 8 / 5;
+  border-radius: 3.333cqw;
+  padding: 4.167cqw 4.583cqw;
   background: #990000 url(assets/passes/sbu-card.png) center / cover no-repeat;
   color: #fff;
   display: flex;
@@ -203,20 +217,20 @@ a { color: inherit; }
 }
 .card-student__title {
   font-family: 'Space Mono', monospace;
-  font-size: 19px;
-  letter-spacing: 1.5px;
+  font-size: clamp(13px, 3.958cqw, 19px);
+  letter-spacing: .079em;
   opacity: .9;
 }
-.card-student__meta { position: absolute; left: 192px; right: 22px; bottom: 80px; }
-.card-student__year { font-size: 24px; font-weight: 600; line-height: 1.05; }
-.card-student__degree { font-size: 13px; opacity: .92; margin-top: 5px; line-height: 1.35; }
+.card-student__meta { position: absolute; left: 40cqw; right: 4.583cqw; bottom: 16.667cqw; }
+.card-student__year { font-size: clamp(16px, 5cqw, 24px); font-weight: 600; line-height: 1.05; }
+.card-student__degree { font-size: clamp(10.5px, 2.708cqw, 13px); opacity: .92; margin-top: .38em; line-height: 1.35; }
 
 /* 2 — work */
 .card-work {
   position: relative;
-  height: 300px;
-  border-radius: 16px;
-  padding: 22px 24px;
+  aspect-ratio: 8 / 5;
+  border-radius: 3.333cqw;
+  padding: 4.583cqw 5cqw;
   color: #1c2e37;
   display: flex;
   flex-direction: column;
@@ -226,10 +240,10 @@ a { color: inherit; }
 }
 .card-work__orb {
   position: absolute;
-  right: -40px;
-  top: -40px;
-  width: 180px;
-  height: 180px;
+  right: -8.333cqw;
+  top: -8.333cqw;
+  width: 37.5cqw;
+  height: 37.5cqw;
   border-radius: 50%;
   background: rgba(255, 255, 255, .10);
 }
@@ -245,29 +259,37 @@ a { color: inherit; }
 }
 .card-work__title {
   font-family: 'Space Mono', monospace;
-  font-size: 19px;
-  letter-spacing: 2.5px;
+  font-size: clamp(13px, 3.958cqw, 19px);
+  letter-spacing: .132em;
   font-weight: 700;
 }
-.card-work__chips { display: flex; justify-content: flex-start; align-items: center; gap: 14px; }
+.card-work__chips { display: flex; justify-content: flex-start; align-items: center; gap: 2.917cqw; }
+/* the chip glyphs carry width/height attributes — override so they scale too */
+.card-work__chips svg { height: auto; }
+.card-work__chips svg:nth-child(1) { width: 9.583cqw; }
+.card-work__chips svg:nth-child(2) { width: 4.583cqw; }
 .card-work__foot { display: flex; justify-content: flex-end; align-items: flex-end; }
 .card-work__holder-wrap { text-align: right; }
 .card-work__holder-label {
   font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1.5px;
+  font-size: clamp(8px, 1.875cqw, 9px);
+  letter-spacing: .167em;
   opacity: .6;
 }
-.card-work__holder-name { font-size: 17px; font-weight: 600; letter-spacing: .3px; margin-top: 3px; }
+.card-work__holder-name { font-size: clamp(12px, 3.542cqw, 17px); font-weight: 600; letter-spacing: .018em; margin-top: .18em; }
 
 /* ============================================================
    detail panels
    ============================================================ */
 .detail {
-  /* sits in normal flow, pushed below the focused card (300px tall) so the
-     panel's height is driven by its content — no fixed box, no inner scroll */
+  /* sits in normal flow, pushed below the focused card so the panel's height is
+     driven by its content — no fixed box, no inner scroll.
+     percentage margins resolve against the CONTAINING BLOCK'S WIDTH, and this
+     panel's containing block is .wallet — so 100% is the wallet's width and
+     100% * 5/8 is exactly the card's height at any viewport. no JS needed.
+     (at 480px: 300 + 18 = 318px, the value this replaces.) */
   position: relative;
-  margin-top: 318px;
+  margin-top: calc(100% * 5 / 8 + 18px);
   display: none;            /* JS toggles to block */
   font-family: 'Hanken Grotesk', sans-serif;
   color: #1d1c19;
