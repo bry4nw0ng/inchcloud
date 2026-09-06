@@ -215,8 +215,14 @@
       card.setAttribute('aria-label', CARD_LABELS[idx] || ('card ' + (idx + 1)));
       card.setAttribute('aria-expanded', 'false');
       card.setAttribute('aria-controls', 'panel-' + idx);
-      card.addEventListener('click', function () { toggleCard(idx); });
+      // a drag past the slop threshold already did its job on pointerup, so it
+      // must not also read as a tap — that would re-toggle the card it closed
+      card.addEventListener('click', function () {
+        if (suppressClick) { suppressClick = false; return; }
+        toggleCard(idx);
+      });
       card.addEventListener('keydown', function (e) { cardKey(e, idx); });
+      card.addEventListener('pointerdown', function (e) { dragStart(e, idx); });
       wallet.appendChild(card);
       cardEls[idx] = card;
 
@@ -398,6 +404,118 @@
     if (document.fullscreenElement || document.webkitFullscreenElement) return;
     closeCard();
   });
+
+  // ---- pull down to close ----
+  // on a phone the back arrow was the only way out: a 40px target in the corner
+  // of a thing that otherwise behaves like a stack of physical cards. so the
+  // focused card is a handle — pull it down and the pass goes back in the stack.
+  //
+  // the gesture arms only at the top of the page. below that, a downward drag
+  // means "scroll up" and the browser keeps it; see .wallet.is-top in the css,
+  // which is where touch-action hands us the vertical axis in the first place.
+  var SLOP = 8;              // movement before a touch stops being a tap
+  var DISMISS_RATIO = 0.22;  // fraction of the card's height that commits
+  var FLICK = 0.5;           // px/ms — a fast flick commits at any distance
+  var drag = null;
+  var suppressClick = false;
+
+  function atTop() {
+    return (window.scrollY || document.documentElement.scrollTop || 0) <= 1;
+  }
+  function syncTop() { wallet.classList.toggle('is-top', atTop()); }
+
+  function dragStart(e, idx) {
+    suppressClick = false;
+    drag = null;
+    if (state.focused !== idx) return;   // reordering the stack is its own gesture
+    if (!atTop()) return;
+    if (e.button > 0) return;            // right / middle button
+    drag = {
+      idx: idx,
+      id: e.pointerId,
+      mouse: e.pointerType === 'mouse',
+      x: e.clientX,
+      y: e.clientY,
+      dy: 0,
+      v: 0,
+      lastY: e.clientY,
+      lastT: e.timeStamp,
+      mode: null                         // 'dismiss' | 'scroll', decided on first move
+    };
+  }
+
+  function dragMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x;
+    var dy = e.clientY - drag.y;
+
+    if (drag.mode === null) {
+      if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
+      // past slop this is a drag, whatever we go on to do with it. set before
+      // the bail-outs below: a gesture we decline is still not a tap, and
+      // letting it fall through to the click handler toggles the card.
+      suppressClick = true;
+      // a mostly-horizontal drag isn't ours — drop it rather than guess
+      if (Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
+      // the card owns both directions here (touch-action: none), so an upward
+      // drag has to be given back to the page by hand or the card becomes a
+      // dead zone for scrolling. a mouse never needed that — it has a wheel.
+      drag.mode = dy > 0 ? 'dismiss' : 'scroll';
+      if (drag.mode === 'scroll' && drag.mouse) { drag = null; return; }
+      try { cardEls[drag.idx].setPointerCapture(drag.id); } catch (err) {}
+      if (drag.mode === 'dismiss') wallet.classList.add('is-dragging');
+    }
+
+    var dt = e.timeStamp - drag.lastT;
+    if (dt > 0) drag.v = (e.clientY - drag.lastY) / dt;
+    drag.lastY = e.clientY;
+    drag.lastT = e.timeStamp;
+
+    if (drag.mode === 'scroll') {
+      // absolute, not incremental: the gesture started at scroll top, so the
+      // finger's total displacement is the scroll position. reversing returns.
+      window.scrollTo(0, Math.max(0, -dy));
+      return;
+    }
+    drag.dy = dy > 0 ? dy : dy * 0.25;   // pulling back up rubber-bands
+    paintDrag(drag.idx, drag.dy);
+  }
+
+  // the panel travels with the card and fades as the two pull away from the
+  // page, so the pass reads as the thing being dismissed. transform + opacity
+  // only — the wallet is height:auto while open and must not reflow per frame.
+  function paintDrag(idx, dy) {
+    var shift = 'translateY(' + dy + 'px)';
+    cardEls[idx].style.transform = shift;
+    panelEls[idx].style.transform = shift;
+    var t = Math.min(1, Math.max(0, dy) / (geo.cardH * DISMISS_RATIO * 2));
+    panelEls[idx].style.opacity = String(1 - t * 0.55);
+  }
+
+  function dragEnd(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var d = drag;
+    drag = null;
+    if (d.mode !== 'dismiss') return;
+
+    // drop is-dragging BEFORE writing the resting styles: the transition that
+    // animates the card home is the one on the new style, so it has to be back
+    // in place by the time closeCard/positionCard sets the final transform.
+    wallet.classList.remove('is-dragging');
+    panelEls[d.idx].style.transform = '';
+    panelEls[d.idx].style.opacity = '';
+
+    var commit = e.type !== 'pointercancel' &&
+      (d.dy > geo.cardH * DISMISS_RATIO || (d.v > FLICK && d.dy > 24));
+    if (commit) closeCard();
+    else positionCard(cardEls[d.idx], d.idx);   // snap back where it was
+  }
+
+  window.addEventListener('pointermove', dragMove);
+  window.addEventListener('pointerup', dragEnd);
+  window.addEventListener('pointercancel', dragEnd);
+  window.addEventListener('scroll', syncTop, { passive: true });
+  syncTop();
 
   // ---- positioning (computed per state, so kept inline) ----
   function positionCard(el, i) {

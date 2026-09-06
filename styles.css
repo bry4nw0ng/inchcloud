@@ -222,10 +222,26 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
   right: 0;
   container-type: inline-size;
   cursor: pointer;
+  /* the card is a drag handle, so a slow press must not start a text selection
+     or leave a highlight trailing behind the finger */
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform .6s cubic-bezier(.22, 1, .36, 1),
               opacity .4s ease,
               top .6s cubic-bezier(.22, 1, .36, 1);
 }
+
+/* pull-to-close: the focused card needs the vertical axis, which the browser
+   only gives up if we ask for it before the gesture starts. gated on is-top
+   (JS, from scroll position) so that further down the page the card is an
+   ordinary scroll surface again and a downward drag scrolls, as it should.
+   the buried cards are pointer-events:none, so this only ever reaches one. */
+.wallet.is-active.is-top .card { touch-action: none; }
+
+/* while the finger is down the card and its panel follow it exactly — a
+   transition here would put them behind the touch by a frame or six */
+.wallet.is-dragging .card,
+.wallet.is-dragging .detail { transition: none; }
 
 /* desktop hover — the card slides a little further out of the wallet.
    the lift lives on the face (the card's only child), not on .card itself:
@@ -252,6 +268,7 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
   .card,
   .card > *,
   .wallet,
+  .detail,
   .activity__body,
   .activity__chevron,
   .proj__media__poster::after { transition: none; }
@@ -425,6 +442,9 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
   font-family: 'Hanken Grotesk', sans-serif;
   color: #1d1c19;
   border-radius: 18px;
+  /* only ever animates on a released pull-to-close that didn't commit: the
+     panel rides back up with the card instead of snapping. */
+  transition: transform .6s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
 }
 .detail.is-open { display: block; }
 
