@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- the cloud is the only thing on screen while the preloader is up, so it is
+     the first subresource in the document — ahead of the stylesheets and the
+     card art, which would otherwise be discovered first and compete for the
+     connection. head preloads also outrank an <img> in the body. at 192px it
+     is ~12 KB, so it lands in the first round trip and the preloader never
+     paints empty. (it was 2000x2000 / 277 KB, displayed at 72.) -->
+<link rel="preload" as="image" href="assets/logos/inchcloud.png" fetchpriority="high">
 <title>bryan's digital wallet</title>
 <link rel="icon" type="image/png" href="assets/logos/inchcloud.png">
 <meta name="description" content="bryan wong · cs grad, leaning product. a digital wallet portfolio.">
@@ -10,11 +18,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-
-<!-- the cloud is the first thing on screen, so it goes first: head preloads
-     outrank an <img> in the body, and the card art below is heavy enough to
-     starve it if it queued behind. -->
-<link rel="preload" as="image" href="assets/logos/inchcloud.png" fetchpriority="high">
 
 <!-- the card faces live inside <template>s below, and template content is
      inert — the browser won't fetch any of this until wallet.js clones the
@@ -193,10 +196,12 @@
         <div class="proj__stack">typescript · wolfie2d · html5 canvas · firebase</div>
         <p class="proj__desc">a single-player game where you play as a slime through different biomes, dodging enemies and projectiles while collecting dropped items to become a strange amalgamation instead of evolving into a traditional apex predator.</p>
         <div class="proj__media" data-media>
-          <video class="proj__media__vid" data-vid preload="none" controls playsinline>
+          <video class="proj__media__vid" data-vid preload="none" controls playsinline
+                 poster="assets/projects/posters/almostapex.webp">
             <source src="assets/projects/almostapex_trailer.mp4" type="video/mp4">
           </video>
           <button type="button" class="proj__media__poster" data-poster aria-label="play almost apex demo">
+            <img class="proj__media__still" src="assets/projects/posters/almostapex.webp" alt="" decoding="async">
             <span class="proj__media__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg></span>
             <span class="proj__media__label">almost apex</span>
           </button>
@@ -207,10 +212,12 @@
         <div class="proj__stack">react · node · express · postgres · mapbox · heroku</div>
         <p class="proj__desc">a full-stack campus parking system. real-time lot availability, reservations, and secure payments; mapbox routes you to the nearest open spot, and an admin dashboard for analytics + managing lots.</p>
         <div class="proj__media" data-media>
-          <video class="proj__media__vid" data-vid preload="none" controls playsinline>
+          <video class="proj__media__vid" data-vid preload="none" controls playsinline
+                 poster="assets/projects/posters/p4sbu.webp">
             <source src="assets/projects/p4sbu_demo.mp4" type="video/mp4">
           </video>
           <button type="button" class="proj__media__poster" data-poster aria-label="play p4sbu demo">
+            <img class="proj__media__still" src="assets/projects/posters/p4sbu.webp" alt="" decoding="async">
             <span class="proj__media__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg></span>
             <span class="proj__media__label">p4sbu</span>
           </button>
@@ -221,10 +228,12 @@
         <div class="proj__stack">mongodb · express · react · node</div>
         <p class="proj__desc">a full-stack reddit clone with the same abilities to create posts, comments, voting, communities. uses mern stack, restful apis, jwt auth + session cookies.</p>
         <div class="proj__media" data-media>
-          <video class="proj__media__vid" data-vid preload="none" controls playsinline>
+          <video class="proj__media__vid" data-vid preload="none" controls playsinline
+                 poster="assets/projects/posters/phreddit.webp">
             <source src="assets/projects/phreddit_demo.mp4" type="video/mp4">
           </video>
           <button type="button" class="proj__media__poster" data-poster aria-label="play phreddit demo">
+            <img class="proj__media__still" src="assets/projects/posters/phreddit.webp" alt="" decoding="async">
             <span class="proj__media__play" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg></span>
             <span class="proj__media__label">phreddit</span>
           </button>
