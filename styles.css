@@ -40,9 +40,46 @@ a { color: inherit; }
   background: oklch(0.97 0.006 95);   /* same as body — no seam on fade-out */
   opacity: 1;
   transition: opacity .45s ease;
+  /* failsafe. showing this by default is what makes it work without js, but it
+     also means js is the only thing that takes it away — so anything that
+     throws in wallet.js strands the visitor under the cloud forever. this fade
+     runs on its own clock, so a broken script degrades to a plain page instead
+     of a locked one. 5s clears the gate's own 4s MAX_WAIT by a second, so on a
+     healthy load the overlay is already display:none before this fires — it
+     should never be the thing that reveals the page.
+     the overlay clears at whichever of MIN_SHOWN or MAX_WAIT is later, so this
+     delay has to stay above both — raise either one past 5s and a perfectly
+     healthy load trips the failsafe and shows the empty-wallet note. */
+  animation: preloader-failsafe .6s ease 5s forwards;
+}
+@keyframes preloader-failsafe {
+  to { opacity: 0; visibility: hidden; }
 }
 .preloader.is-done { opacity: 0; pointer-events: none; }
 .preloader.is-gone { display: none; }
+
+/* the page behind the cloud is invisible but still tabbable — a keyboard user
+   can land on the footer links while the overlay is up. hide it from the tab
+   order too (visibility does both), keyed off the preloader's own class so
+   there's a single source of truth, and carrying the same 5s escape hatch so a
+   dead script can't leave the content permanently hidden either.
+   :has() is unsupported in older browsers, which drops the whole rule — that
+   just restores today's behavior, so there's nothing to fall back to. */
+body:has(.preloader:not(.is-done)) :is(.wallet-header, #wallet, .wallet-footer) {
+  visibility: hidden;
+  animation: preloader-reveal 0s linear 5s forwards;
+}
+@keyframes preloader-reveal {
+  to { visibility: visible; }
+}
+
+/* the note that explains the empty page, on the same hook. it needs no timing
+   of its own: it sits behind the overlay from first paint, so the preloader
+   fading is what reveals it. on a working load .is-done lands ~1.25s, the
+   :has() stops matching, and it goes back to display:none before the overlay
+   has faded far enough to show anything. */
+.wallet-fallback { display: none; }
+body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
 
 .preloader__mark {
   width: 72px;
@@ -56,6 +93,9 @@ a { color: inherit; }
 }
 @media (prefers-reduced-motion: reduce) {
   .preloader__mark { animation: none; opacity: .55; }
+  /* the cross-fade goes too, but not the failsafe — that isn't decoration.
+     zero duration keeps it as an instant cut at the 8s mark. */
+  .preloader { transition: none; animation-duration: 0s; }
 }
 
 /* ---- header ---- */
@@ -162,8 +202,16 @@ a { color: inherit; }
   .card > * { transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
   .wallet:not(.is-active) .card:hover > * { transform: translateY(-10px); }
 }
+/* the entrance and the focus/back animations are all transitions on inline
+   styles JS sets, so killing the transition is enough — the cards still go
+   exactly where they belong, they just arrive instead of sliding. same for the
+   wallet's height and the activity rows: state changes, nothing travels. */
 @media (prefers-reduced-motion: reduce) {
-  .card > * { transition: none; }
+  .card,
+  .card > *,
+  .wallet,
+  .activity__body,
+  .activity__chevron { transition: none; }
   .wallet:not(.is-active) .card:hover > * { transform: none; }
 }
 
@@ -193,13 +241,16 @@ a { color: inherit; }
   object-fit: cover;
   border-radius: 1.667cqw;
 }
+/* no object-position here on purpose: both photos are landscape (648×590 and
+   648×577) in a portrait box, so `cover` only ever crops horizontally. a
+   vertical offset has nothing to move, and the horizontal half would just be
+   restating the `center` default. if either photo is ever swapped for a tall
+   one, that's the moment to reintroduce it. */
 .id-photo--nyc {
-  object-position: center 20%;
   border: 2px solid #493724;
   box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
 }
 .id-photo--grad {
-  object-position: center 18%;
   border: 2px solid #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, .28);
 }
@@ -417,6 +468,16 @@ a { color: inherit; }
   font-size: 11px;
   color: #b3b0a6;
   margin-top: 10px;
+}
+/* this one can't just stop — scrolling is how the far end of the list is
+   reachable at all. hand the reader the scrollbar instead, drop the duplicate
+   half (it exists only so the loop can wrap seamlessly), and drop the caption,
+   which now describes behavior that no longer happens. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee { overflow-x: auto; }
+  .marquee__track { animation: none; }
+  .marquee__group[aria-hidden="true"] { display: none; }
+  .marquee__caption { display: none; }
 }
 
 .coursework__head {

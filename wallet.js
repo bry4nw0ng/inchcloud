@@ -1,7 +1,12 @@
 (function () {
   "use strict";
 
-  var N = 6;
+  // one card per face template in index.html, so adding a pass there is the
+  // only edit needed — nothing in here has to be kept in step with the markup.
+  var N = document.querySelectorAll('template[id^="face-"]').length;
+  if (document.querySelectorAll('template[id^="detail-"]').length !== N) {
+    console.warn('wallet: face/detail template counts disagree — every face-N needs a detail-N');
+  }
 
   // ---- geometry ----
   // the card is 8/5 in css (aspect-ratio on every face), matching the art.
@@ -165,7 +170,9 @@
 
   // clone a <template> from index.html by id, returning its root element
   function tmpl(id) {
-    return document.getElementById(id).content.firstElementChild.cloneNode(true);
+    var t = document.getElementById(id);
+    if (!t) throw new Error('wallet: missing <template id="' + id + '">');
+    return t.content.firstElementChild.cloneNode(true);
   }
 
   // ---- build DOM ----
@@ -239,9 +246,17 @@
       el.textContent = actions[cur];
     });
 
+    var lockedAt = -1;   // panel width the current min-height was measured at
+
     lockShuffleHeight = function () {
       // offsetParent is null while the panel is display:none — can't measure yet
       if (!para || para.offsetParent === null) return;
+      // the answer only depends on where the text wraps, so it goes stale only
+      // when the paragraph's width changes. worth checking: the loop below
+      // forces a synchronous layout per action, and this runs on every resize
+      // frame and every open of the about panel.
+      if (para.clientWidth === lockedAt) return;
+      lockedAt = para.clientWidth;
       para.style.minHeight = '';
       var max = 0;
       for (var i = 0; i < actions.length; i++) {
@@ -251,8 +266,9 @@
       el.textContent = actions[cur];
       para.style.minHeight = max + 'px';
     };
-    // width changes the wrap point, so remeasure when the window resizes
-    window.addEventListener('resize', lockShuffleHeight);
+    // width changes the wrap point, so this needs to rerun on resize — but it
+    // rides the single rAF-coalesced resize handler below (via apply) rather
+    // than adding a listener of its own that fires on every raw resize event.
   })();
 
   // [data-copy] elements (footer mail pill + about-me email): copy to clipboard
@@ -381,19 +397,18 @@
   // <link rel="preload"> hints in index.html start the downloads earlier; this
   // gate makes sure we don't animate until they've actually decoded.
   //
-  // listed explicitly rather than scraped from the DOM: querySelectorAll('img')
-  // silently misses nyc-skyline and sbu-card, which are background-images.
-  var FACE_IMAGES = [
-    'assets/passes/nyc-skyline.png',
-    'assets/passes/bryan-id.jpg',
-    'assets/passes/sbu-card.png',
-    'assets/passes/bryan-grad.jpg',
-    'assets/passes/projects-card.png',
-    'assets/passes/casb-photo.png',
-    'assets/passes/boarding-pass.png'
-  ];
+  // read off the <link rel="preload" data-face> hints in index.html instead of
+  // being listed again here. scraping the DOM for <img> wouldn't work — it
+  // silently misses nyc-skyline and sbu-card, which are css background-images —
+  // and a second hand-kept copy would drift: add a pass, forget this list, and
+  // the gate opens on art that hasn't decoded.
+  var FACE_IMAGES = Array.prototype.map.call(
+    document.querySelectorAll('link[data-face]'),
+    function (link) { return link.getAttribute('href'); }
+  );
+  
 
-  var MIN_SHOWN = 1500;   // the cloud always gets its full beat, even on a warm
+  var MIN_SHOWN = 1250;   // the cloud always gets its full beat, even on a warm
                           // cache where the art is ready immediately
   var MAX_WAIT  = 4000;   // a 404 or a stalled network must never trap the user
 
@@ -438,7 +453,9 @@
   }
 
   var preloader = document.getElementById('preloader');
-  var shownAt = Date.now();   // it is already on screen — css shows it by default
+  // it is already on screen — css shows it by default. performance.now() rather
+  // than Date.now() so a clock adjustment mid-load can't skew the hold.
+  var shownAt = performance.now();
   var settled = false;
 
   function finish() {
@@ -447,7 +464,7 @@
     // hold the cloud for its full beat even if the art was ready instantly,
     // then cross its fade with the cards rising so the two overlap rather
     // than play back to back
-    var held = Math.max(0, MIN_SHOWN - (Date.now() - shownAt));
+    var held = Math.max(0, MIN_SHOWN - (performance.now() - shownAt));
     window.setTimeout(function () {
       preloader.classList.add('is-done');
       window.setTimeout(startEntrance, 200);

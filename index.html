@@ -20,14 +20,18 @@
      inert — the browser won't fetch any of this until wallet.js clones the
      faces into the DOM. these hints start the downloads during html parse
      instead, so the art is usually decoded by the time the intro runs.
-     the last two are css background-images, which are just as inert. -->
-<link rel="preload" as="image" href="assets/passes/bryan-id.jpg">
-<link rel="preload" as="image" href="assets/passes/bryan-grad.jpg">
-<link rel="preload" as="image" href="assets/passes/projects-card.png">
-<link rel="preload" as="image" href="assets/passes/casb-photo.png">
-<link rel="preload" as="image" href="assets/passes/boarding-pass.png">
-<link rel="preload" as="image" href="assets/passes/nyc-skyline.png">
-<link rel="preload" as="image" href="assets/passes/sbu-card.png">
+     the last two are css background-images, which are just as inert.
+
+     THIS IS THE LIST. wallet.js reads these [data-face] hints back out to know
+     what its preloader gate should wait on, so adding a card face means adding
+     one line here and nothing else. -->
+<link rel="preload" as="image" href="assets/passes/bryan-id.jpg" data-face>
+<link rel="preload" as="image" href="assets/passes/bryan-grad.jpg" data-face>
+<link rel="preload" as="image" href="assets/passes/projects-card.png" data-face>
+<link rel="preload" as="image" href="assets/passes/casb-photo.webp" data-face>
+<link rel="preload" as="image" href="assets/passes/boarding-pass.png" data-face>
+<link rel="preload" as="image" href="assets/passes/nyc-skyline.png" data-face>
+<link rel="preload" as="image" href="assets/passes/sbu-card.png" data-face>
 </head>
 <body>
 
@@ -43,6 +47,12 @@
   </header>
 
   <div id="wallet"></div>
+
+  <!-- only ever seen if wallet.js never ran. the css failsafe uncovers the page
+       at 5s, and without this the visitor gets a header, a footer, and an
+       unexplained hole where the cards should be. css keys it off the
+       preloader's class, so a healthy load can't display it. -->
+  <p class="wallet-fallback" role="status">my wallet isn't usually empty i swear, try refreshing the page</p>
 
   <footer class="wallet-footer">
     <div class="wallet-footer__issued">issued by bryan wong</div>
@@ -60,9 +70,21 @@
   </footer>
 
   <!-- ============================================================
-       pass content — edit the text/markup here, not in wallet.js
+       pass content
        face-N = the card face · detail-N = the panel it opens to
        (N: 0 nyc · 1 student · 2 work · 3 projects · 4 club · 5 personal)
+
+       most copy lives here, but not all of it — three panels are rendered from
+       data arrays in wallet.js, because they're repeating rows:
+         detail-0  the shuffling line          → `actions`
+         detail-1  coursework + skills         → `courses`, `skills`
+         detail-2  the activity rows           → `work`, `extra`, `education`
+       everything else on those panels (headings, labels, layout) is here, at
+       the [data-*] anchors the js renders into.
+
+       adding a whole new pass = one face-N + one detail-N below, plus a
+       preload hint in <head>. wallet.js counts these templates, so it needs
+       no edit at all.
        ============================================================ -->
 
   <!-- 0 — NYC ID -->
@@ -159,11 +181,6 @@
     <img class="card-img card-img--projects" src="assets/passes/projects-card.png" alt="projects" draggable="false">
   </template>
   <template id="detail-3">
-    <!-- <div class="detail detail--card detail--construction">
-      <div class="kicker">under construction</div>
-      <p class="construction__lead">this section is still being built — check back soon.</p>
-    </div> -->
-    <!-- ORIGINAL CONTENT — preserved, restore when ready -->
     <div class="detail detail--paper">
       <div class="looseleaf__margin"></div>
       <div class="proj proj--first">
@@ -222,27 +239,18 @@
   </template>
 
   <!-- 4 — CLUB -->
+  <!-- .webp, not the .png sitting next to it: this face is a photograph, and
+       png stores photos losslessly — 764 KB vs 73 KB for the same 960×600
+       image. the png stays in the repo as the source to re-export from (and as
+       a one-line revert), it just isn't what ships. -->
   <template id="face-4">
-    <img class="card-img card-img--club" src="assets/passes/casb-photo.png" alt="casb night market" draggable="false">
+    <img class="card-img card-img--club" src="assets/passes/casb-photo.webp" alt="casb night market" draggable="false">
   </template>
   <template id="detail-4">
     <div class="detail detail--card detail--construction">
       <div class="kicker">under construction</div>
       <p class="construction__lead">this section is still being built — check back soon.</p>
     </div>
-    <!-- ORIGINAL CONTENT — preserved, restore when ready
-    <div class="detail detail--card detail--club">
-      <div class="kicker">leadership</div>
-      <p class="club__lead">webmaster now, ex-fundraising chair (raised <strong>$1,000+</strong>), and before all that the graphic designer. so: ran the site, ran the money, and made the posters.</p>
-      <div class="kicker kicker--gap">design work</div>
-      <div class="design-grid">
-        <div class="slot slot--tile">poster</div>
-        <div class="slot slot--tile">flyer</div>
-        <div class="slot slot--tile">graphic</div>
-      </div>
-      <p class="club__note">craft, shown — drop the real work in here.</p>
-    </div>
-    -->
   </template>
 
   <!-- 5 — PERSONAL -->
@@ -254,12 +262,6 @@
       <div class="kicker">under construction</div>
       <p class="construction__lead">this section is still being built — check back soon.</p>
     </div>
-    <!-- ORIGINAL CONTENT — preserved, restore when ready
-    <div class="detail detail--card detail--personal">
-      <div class="kicker">off the clock</div>
-      <p class="personal__lead">weekends are for trails and the occasional very wrong turn.</p>
-    </div>
-    -->
   </template>
 
   <script src="wallet.js"></script>
