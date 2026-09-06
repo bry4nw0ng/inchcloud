@@ -19,6 +19,36 @@ body {
 }
 a { color: inherit; }
 
+/* ---- keyboard focus ----
+   the stylesheet had no :focus rules at all, so the footer links and the copy
+   pills were focusable with nothing on screen to show it. :focus-visible keeps
+   the ring off mouse clicks and paints it only for keyboard users. outlines
+   follow the element's own border-radius, so the pills stay pill-shaped. */
+:focus-visible {
+  outline: 2px solid #1c1c1a;
+  outline-offset: 3px;
+}
+/* the poster button is full-bleed inside an overflow:hidden box, so an outward
+   ring gets clipped — tuck it inside, and go light since it sits on the scrim */
+.proj__media__poster:focus-visible {
+  outline-color: #f7f4ec;
+  outline-offset: -4px;
+}
+
+/* visually hidden, still read aloud — for text that only carries meaning to a
+   screen reader, like the names of the key glyphs in the header line */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* shared mono eyebrow tone */
 .mono { font-family: 'Space Mono', monospace; }
 
@@ -101,6 +131,10 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
 /* ---- header ---- */
 .wallet-header { width: min(480px, 100%); margin-bottom: 30px; }
 .wallet-header__kicker {
+  /* it is the page's <h1> now — undo the UA margin AND weight, or it renders
+     bold instead of inheriting the body's 400 the way the div did */
+  margin: 0;
+  font-weight: 400;
   font-family: 'Space Mono', monospace;
   font-size: 12px;
   letter-spacing: 4px;
@@ -157,6 +191,7 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
 }
 
 .back-btn {
+  padding: 0;              /* it is a <button> now — drop the UA padding */
   position: absolute;
   top: 14px;
   left: -56px;
@@ -202,6 +237,13 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
   .card > * { transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
   .wallet:not(.is-active) .card:hover > * { transform: translateY(-10px); }
 }
+/* the same lift for keyboard focus, so arrowing through the stack looks like
+   hovering it. outside the query above on purpose — a touch device can still
+   have a keyboard attached — so it carries its own transition. */
+.wallet:not(.is-active) .card:focus-visible > * {
+  transform: translateY(-10px);
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
 /* the entrance and the focus/back animations are all transitions on inline
    styles JS sets, so killing the transition is enough — the cards still go
    exactly where they belong, they just arrive instead of sliding. same for the
@@ -213,7 +255,8 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
   .activity__body,
   .activity__chevron,
   .proj__media__poster::after { transition: none; }
-  .wallet:not(.is-active) .card:hover > * { transform: none; }
+  .wallet:not(.is-active) .card:hover > *,
+  .wallet:not(.is-active) .card:focus-visible > * { transform: none; }
 }
 
 /* ============================================================
@@ -546,6 +589,7 @@ body:has(.preloader:not(.is-done)) .wallet-fallback { display: block; }
 
 /* work panel — activity list */
 .detail__title {
+  margin: 0;               /* it is an <h2> now */
   font-family: 'Space Mono', monospace;
   font-size: 13px;
   letter-spacing: 2.5px;

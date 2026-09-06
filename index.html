@@ -45,11 +45,11 @@
   </div>
 
   <header class="wallet-header">
-    <div class="wallet-header__kicker">bryan's digital wallet</div>
-    <div class="wallet-header__sub">tap a card/pass to open it · tap again to close</div>
+    <h1 class="wallet-header__kicker">bryan's digital wallet</h1>
+    <div class="wallet-header__sub">tap a card/pass to open it · tap again to close · or play around with <span aria-hidden="true">↑↓ ⏎ ↹</span><span class="sr-only">the arrow, enter, and tab keys</span></div>
   </header>
 
-  <div id="wallet"></div>
+  <main id="wallet"></main>
 
   <!-- only ever seen if wallet.js never ran. the css failsafe uncovers the page
        at 5s, and without this the visitor gets a header, a footer, and an
@@ -172,7 +172,7 @@
   </template>
   <template id="detail-2">
     <div class="detail detail--card detail--work">
-      <div class="detail__title-wrap"><div class="detail__title">recent activity</div></div>
+      <div class="detail__title-wrap"><h2 class="detail__title">recent activity</h2></div>
       <div class="activity-group" data-group="work">work</div>
       <div class="activity-group activity-group--later" data-group="extra">extracurriculars</div>
       <div class="activity-group activity-group--later" data-group="education">education</div>

@@ -150,8 +150,11 @@
       return '<span class="tag">' + esc(t) + '</span>';
     }).join('');
     return '<div class="activity" data-actrow="' + key + '">' +
-      '<div class="activity__head" data-acttoggle="' + key + '">' +
-        '<div class="activity__logo"><img src="' + it.logo + '" alt="' + esc(it.company) + '"></div>' +
+      '<div class="activity__head" data-acttoggle="' + key + '" role="button" tabindex="0"' +
+        ' aria-expanded="false" aria-controls="actbody-' + key + '">' +
+        // alt="" because the company name sits in the text right beside it —
+        // with the row now a button, a duplicate would land in its own name
+        '<div class="activity__logo"><img src="' + it.logo + '" alt=""></div>' +
         '<div class="activity__main">' +
           '<div class="activity__company">' + esc(it.company) + '</div>' +
           '<div class="activity__role">' + esc(it.role) + '</div>' +
@@ -159,7 +162,7 @@
         '</div>' +
         '<svg class="activity__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b6b6ab" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>' +
       '</div>' +
-      '<div class="activity__body">' +
+      '<div class="activity__body" id="actbody-' + key + '">' +
         '<div class="activity__inner">' +
           '<p class="activity__desc">' + esc(it.desc) + '</p>' +
           (tags ? '<div class="activity__tags">' + tags + '</div>' : '') +
@@ -175,14 +178,29 @@
     return t.content.firstElementChild.cloneNode(true);
   }
 
+  // the card faces are art with no text equivalent, so each card carries its
+  // own name. kept short on purpose: with arrow-key browsing a screen reader
+  // reads this on every keypress. falls back if a face is added without one.
+  var CARD_LABELS = [
+    'my id',
+    'student id',
+    'professional experience',
+    'projects',
+    'chinese association at stony brook',
+    'more about me',
+  ];
+
   // ---- build DOM ----
   var wallet = document.getElementById('wallet');
   wallet.className = 'wallet';
 
-  var back = document.createElement('div');
+  var back = document.createElement('button');
+  back.type = 'button';
   back.className = 'back-btn';
-  back.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c1c1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>';
-  back.addEventListener('click', function () { state.focused = null; state.act = {}; apply(); });
+  back.setAttribute('aria-label', 'close this pass');
+  back.tabIndex = -1;      // nothing is open yet; apply() takes it from here
+  back.innerHTML = '<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1c1c1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>';
+  back.addEventListener('click', closeCard);
   wallet.appendChild(back);
 
   var cardEls = [];
@@ -192,15 +210,18 @@
       var card = document.createElement('div');
       card.className = 'card';
       card.appendChild(tmpl('face-' + idx));
-      card.addEventListener('click', function () {
-        state.focused = (state.focused === idx) ? null : idx;
-        state.act = {};
-        apply();
-      });
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', CARD_LABELS[idx] || ('card ' + (idx + 1)));
+      card.setAttribute('aria-expanded', 'false');
+      card.setAttribute('aria-controls', 'panel-' + idx);
+      card.addEventListener('click', function () { toggleCard(idx); });
+      card.addEventListener('keydown', function (e) { cardKey(e, idx); });
       wallet.appendChild(card);
       cardEls[idx] = card;
 
       var panel = tmpl('detail-' + idx);
+      panel.id = 'panel-' + idx;
       wallet.appendChild(panel);
       panelEls[idx] = panel;
     })(i);
@@ -311,10 +332,71 @@
   // wire activity toggles inside work panel
   panelEls[2].querySelectorAll('[data-acttoggle]').forEach(function (el) {
     var key = el.getAttribute('data-acttoggle');
-    el.addEventListener('click', function () {
+    function toggle() {
       if (state.act[key]) { delete state.act[key]; } else { state.act[key] = true; }
       apply();
+    }
+    el.addEventListener('click', toggle);
+    // these rows are role=button on a div (their contents are divs, which a
+    // real <button> may not legally hold), so enter/space are ours to wire
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        toggle();
+      }
     });
+  });
+
+  // ---- keyboard ----
+  // cards are role=button, so enter and space toggle them exactly like a click.
+  // arrows walk the stack visually rather than by index: positionCard puts
+  // index 0 at the BOTTOM (stackPos = N - 1 - i), so up increments and down
+  // decrements. get that backwards and the whole thing feels inverted.
+  function toggleCard(i) {
+    state.focused = (state.focused === i) ? null : i;
+    state.act = {};
+    apply();
+  }
+
+  function closeCard() {
+    var i = state.focused;
+    if (i === null) return;
+    state.focused = null;
+    state.act = {};
+    apply();
+    // apply() has already lifted inert, so the card can take focus again —
+    // without this, closing strands focus on a collapsed element
+    cardEls[i].focus();
+  }
+
+  function cardKey(e, idx) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();          // space would otherwise scroll the page
+      toggleCard(idx);
+      return;
+    }
+    // walking the stack only means anything while it is closed; with a panel
+    // open the other cards are inert and could not take focus regardless
+    if (state.focused !== null) return;
+    var next;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') next = idx + 1;
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') next = idx - 1;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = N - 1;
+    else return;
+    e.preventDefault();
+    // stop at the ends rather than wrapping — tab also moves between cards,
+    // and wrapping arrows on top of that reads as unpredictable
+    if (next >= 0 && next < N) cardEls[next].focus();
+  }
+
+  // escape works from anywhere inside the open panel, not just from the card
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    // a project video in fullscreen also exits on escape — let the browser have
+    // that one rather than collapsing the panel out from under the user
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    closeCard();
   });
 
   // ---- positioning (computed per state, so kept inline) ----
@@ -354,7 +436,17 @@
     for (var i = 0; i < N; i++) {
       positionCard(cardEls[i], i);
       panelEls[i].classList.toggle('is-open', state.focused === i);
+      // the buried cards are invisible to the mouse (opacity + pointer-events)
+      // but tab does not read either of those — inert takes them out of the tab
+      // order and the accessibility tree together
+      var buried = active && state.focused !== i;
+      cardEls[i].setAttribute('aria-expanded', state.focused === i ? 'true' : 'false');
+      cardEls[i].setAttribute('tabindex', buried ? '-1' : '0');
+      if ('inert' in cardEls[i]) { cardEls[i].inert = buried; }
     }
+    // same story for the back button, which is opacity:0 when nothing is open
+    back.tabIndex = active ? 0 : -1;
+    if ('inert' in back) { back.inert = !active; }
 
     // the about panel just became visible — now that it has layout, reserve
     // space for the tallest shuffle action so swapping text doesn't shift things
@@ -362,6 +454,9 @@
 
     panelEls[2].querySelectorAll('[data-actrow]').forEach(function (row) {
       row.classList.toggle('is-open', !!state.act[row.getAttribute('data-actrow')]);
+    });
+    panelEls[2].querySelectorAll('[data-acttoggle]').forEach(function (el) {
+      el.setAttribute('aria-expanded', state.act[el.getAttribute('data-acttoggle')] ? 'true' : 'false');
     });
   }
 
