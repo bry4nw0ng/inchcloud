@@ -428,7 +428,10 @@
     suppressClick = false;
     drag = null;
     if (state.focused !== idx) return;   // reordering the stack is its own gesture
-    if (!atTop()) return;
+    // the at-top rule is touch's, not everyone's: it exists to arbitrate against
+    // page scroll, and a mouse drag never competes with scrolling. so a mouse
+    // may pull the card down from any scroll position.
+    if (!atTop() && e.pointerType !== 'mouse') return;
     if (e.button > 0) return;            // right / middle button
     drag = {
       idx: idx,
